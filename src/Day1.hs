@@ -5,13 +5,13 @@ module Day1
 
 import           Data.Monoid
 
-fuelRequirement mass = (mass `div` 3) - 2
+fuelRequirement mass = max ((mass `div` 3) - 2) 0
 
 fullFuelRequirement mass =
   let fuelMass = fuelRequirement mass
       remainder =
         if fuelMass > 0
-          then max (fullFuelRequirement fuelMass) 0
+          then fullFuelRequirement fuelMass
           else 0
    in fuelMass + remainder
 
