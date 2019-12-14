@@ -1,17 +1,24 @@
 module Main where
 
-import           Day1
+import qualified Day1Solution
 
-run file fn = do
-  input <- readFile file
-  let result = fn input
-  print result
+data Day =
+  Day1
 
-day1 = run "input/Day1.txt"
+data Part
+  = Part1
+  | Part2
 
-day1A = day1 Day1.solveA
+getInputFile Day1 = "Day1.txt"
 
-day1B = day1 Day1.solveB
+solution Day1 Part1 = Day1Solution.solveA
+solution Day1 Part2 = Day1Solution.solveB
+
+input day = "input/" ++ getInputFile day
+
+run day part = do
+  input <- readFile $ input day
+  print $ solution day part input
 
 main :: IO ()
-main = day1B
+main = run Day1 Part2
