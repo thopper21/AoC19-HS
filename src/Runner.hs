@@ -9,12 +9,12 @@ data Part
   = Part1
   | Part2
 
-getInputFile Day1 = "Day1.txt"
+toDayNumber Day1 = 1
 
 solution Day1 Part1 = Day1Solution.solveA
 solution Day1 Part2 = Day1Solution.solveB
 
-input day = "input/" ++ getInputFile day
+input day = "input/Day" ++ show (toDayNumber day) ++ ".txt"
 
 run day part = do
   input <- readFile $ input day
