@@ -6,11 +6,11 @@ module Day2Solution
 
 import           Data.IntMap.Lazy
 
-toProgram :: [Int] -> IntMap Int
-toProgram xs =
+toProgram :: Int -> Int -> [Int] -> IntMap Int
+toProgram noun verb xs =
   let toProgram' [] _     = empty
       toProgram' (x:xs) i = insert i x $ toProgram' xs (i + 1)
-   in toProgram' xs 0
+   in insert 2 verb $ insert 1 noun $ toProgram' xs 0
 
 commaToSpace ',' = ' '
 commaToSpace c   = c
@@ -40,4 +40,4 @@ run =
 
 solveA input =
   let programInts = words $ commaToSpace <$> input
-   in run $ toProgram $ read <$> programInts
+   in run $ toProgram 12 2 $ read <$> programInts
