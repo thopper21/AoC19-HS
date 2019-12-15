@@ -1,7 +1,7 @@
 module Day2Solution
-  ( solveA,
-    run,
-    toProgram
+  ( solveA
+  , run
+  , toProgram
   ) where
 
 import           Data.IntMap.Lazy
@@ -26,18 +26,15 @@ op leftPos rightPos outPos program fn =
    in insert outPos result program
 
 run =
-    let
-        run' position program =
-            let opCode = program ! position
-                arg offset = program ! (position + offset)
-                next = run' (position + 4)
-                op' = op (arg 1) (arg 2) (arg 3)
-            in case opCode of
-                    1  -> next $ op' program (+)
-                    2  -> next $ op' program (*)
-                    99 -> toInteger $ program ! 0
-    in run' 0
+  let run' position program =
+        let opCode = program ! position
+            arg offset = program ! (position + offset)
+            next = run' (position + 4)
+            op' = op (arg 1) (arg 2) (arg 3)
+         in case opCode of
+              1  -> next $ op' program (+)
+              2  -> next $ op' program (*)
+              99 -> toInteger $ program ! 0
+   in run' 0
 
-solveA input =
-  let programInts = words $ commaToSpace <$> input
-   in run $ toProgram 12 2 $ read <$> programInts
+solveA input = run $ toProgram 12 2 $ read <$> words (commaToSpace <$> input)
