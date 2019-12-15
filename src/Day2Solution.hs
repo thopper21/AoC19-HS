@@ -5,6 +5,7 @@ module Day2Solution
 
 import           Data.IntMap.Lazy (IntMap, empty, insert, (!))
 import           Data.List        (find, foldl)
+import           Data.List.Split  (splitOn)
 import           Data.Maybe       (fromJust)
 
 toProgram :: Int -> Int -> [Int] -> IntMap Int
@@ -12,13 +13,6 @@ toProgram noun verb =
   let fromList xs =
         foldl (\program (i, x) -> insert i x program) empty (zip [0 ..] xs)
    in insert 2 verb . insert 1 noun . fromList
-
-replace value with =
-  let replacement c =
-        if c == value
-          then with
-          else c
-   in replacement
 
 run =
   let run' position program =
@@ -36,13 +30,13 @@ run =
               99 -> toInteger $ program ! 0
    in run' 0
 
-parseInput input = read <$> words (replace ',' ' ' <$> input)
+parseInput = fmap read . splitOn ","
 
 solveA input = run $ toProgram 12 2 $ parseInput input
 
 solveB input =
   let parsed = parseInput input
-      pred (noun, verb) = 19690720 == run (toProgram noun verb parsed)
+      pred (noun, verb) = run (toProgram noun verb parsed) == 19690720
       (noun, verb) =
         fromJust $
         find pred [(noun, verb) | noun <- [0 .. 99], verb <- [0 .. 99]]
