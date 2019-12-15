@@ -3,16 +3,15 @@ module Day2Solution
   , solveB
   ) where
 
-import           Data.IntMap.Lazy (IntMap, empty, insert, (!))
+import           Data.IntMap.Lazy (IntMap, fromDistinctAscList, insert, (!))
 import           Data.List        (find, foldl)
 import           Data.List.Split  (splitOn)
 import           Data.Maybe       (fromJust)
 
-toProgram :: Int -> Int -> [Int] -> IntMap Int
 toProgram noun verb =
-  let fromList xs =
-        foldl (\program (i, x) -> insert i x program) empty (zip [0 ..] xs)
-   in insert 2 verb . insert 1 noun . fromList
+  let fromList xs = fromDistinctAscList $ zip [0 ..] xs
+      setInput noun verb = insert 2 verb . insert 1 noun
+   in setInput noun verb . fromList
 
 run =
   let run' position program =
