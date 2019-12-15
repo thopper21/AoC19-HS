@@ -1,10 +1,11 @@
 module Day2Solution
   ( solveA
-  , run
-  , toProgram
+  , solveB
   ) where
 
 import           Data.IntMap.Lazy
+import           Data.List        (find)
+import           Data.Maybe
 
 toProgram :: Int -> Int -> [Int] -> IntMap Int
 toProgram noun verb xs =
@@ -37,4 +38,14 @@ run =
               99 -> toInteger $ program ! 0
    in run' 0
 
-solveA input = run $ toProgram 12 2 $ read <$> words (commaToSpace <$> input)
+parseInput input = read <$> words (commaToSpace <$> input)
+
+solveA input = run $ toProgram 12 2 $ parseInput input
+
+solveB input =
+  let parsed = parseInput input
+      pred (noun, verb) = 19690720 == run (toProgram noun verb parsed)
+      (noun, verb) =
+        fromJust $
+        find pred [(noun, verb) | noun <- [0 .. 99], verb <- [0 .. 99]]
+   in toInteger $ 100 * noun + verb
