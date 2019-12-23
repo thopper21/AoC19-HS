@@ -1,2 +1,5 @@
-module Day3Solution (solveA) where
-    solveA _ = 42
+module Day3Solution
+  ( solveA
+  ) where
+
+solveA input = 42
