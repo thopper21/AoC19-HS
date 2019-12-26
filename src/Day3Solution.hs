@@ -1,5 +1,6 @@
 module Day3Solution
-  ( solveA
+  ( solveA,
+    solveB
   ) where
 
 import           Data.Maybe
@@ -74,3 +75,5 @@ solveA s =
         catMaybes
           [intersection l r | l <- toSegments first, r <- toSegments second]
    in toInteger (minimum . filter (> 0) . fmap manhattan $ intersections)
+
+solveB s = 42
