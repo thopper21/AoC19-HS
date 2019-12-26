@@ -1,6 +1,6 @@
 module Day3Solution
-  ( solveA,
-    solveB
+  ( solveA
+  , solveB
   ) where
 
 import           Data.Maybe
