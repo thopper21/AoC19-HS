@@ -54,9 +54,18 @@ writeMem pos = over memory . insert pos
 
 readMem pos = fromJust . lookup pos . view memory
 
-operation 1  = Ternary Add Position Position Position
-operation 2  = Ternary Mult Position Position Position
-operation 99 = Nullary Terminate
+operation 00001  = Ternary Add Position Position Position
+operation 00101  = Ternary Add Immediate Position Position
+operation 01001  = Ternary Add Position Immediate Position
+operation 01101  = Ternary Add Immediate Immediate Position
+operation 00002  = Ternary Mult Position Position Position
+operation 00102  = Ternary Mult Immediate Position Position
+operation 01002  = Ternary Mult Position Immediate Position
+operation 01102  = Ternary Mult Immediate Immediate Position
+operation 003    = Unary In Position
+operation 004    = Unary Out Position
+operation 104    = Unary Out Immediate
+operation 99     = Nullary Terminate
 
 arg offset = do
   pos <- view ip
@@ -78,9 +87,19 @@ ternaryOp fn left right out = do
   y <- readArg right 2
   next 4 . writeArg out 3 (fn x y)
 
+fromInput argument = do
+  val <- head . view input
+  next 2 . writeArg argument 1 val . over input tail
+
+toOutput argument = do
+  val <- readArg argument 1
+  next 2 . over output (cons val)
+
 execute (Ternary Add left right out)  = ternaryOp (+) left right out
 execute (Ternary Mult left right out) = ternaryOp (*) left right out
-execute (Nullary Terminate)  = id
+execute (Unary In argument)           = fromInput argument
+execute (Unary Out argument)          = toOutput argument
+execute (Nullary Terminate)           = id
 
 run = do
   pos <- view ip
