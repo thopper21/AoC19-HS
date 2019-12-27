@@ -58,24 +58,35 @@ operation 1  = Ternary Add Position Position Position
 operation 2  = Ternary Mult Position Position Position
 operation 99 = Nullary Terminate
 
-arg offset program = readMem (view ip program + offset) program
+arg offset =
+  do
+    pos <- view ip
+    readMem (pos + offset)
 
-moveIP offset = over ip (+ offset)
+readArg offset =
+  do
+    pos <- arg offset
+    readMem pos
 
-readArg offset program = readMem (arg offset program) program
+writeArg offset value =
+  do
+    pos <- arg offset
+    writeMem pos value
 
-writeArg offset value program = writeMem (arg offset program) value program
+next offset = run . over ip (+ offset)
 
-binOp fn program =
-  let left = readArg 1 program
-      right = readArg 2 program
-      result = fn left right
-   in run . moveIP 4 . writeArg 3 result $ program
+binOp fn =
+  do
+    left <- readArg 1
+    right <- readArg 2
+    next 4 . writeArg 3 (fn left right)
 
 execute (Ternary Add _ _ _)  = binOp (+)
 execute (Ternary Mult _ _ _) = binOp (*)
 execute (Nullary Terminate)  = id
 
-run program =
-  let op = operation $ readMem (view ip program) program
-   in execute op program
+run =
+  do
+    pos <- view ip
+    opCode <- readMem pos
+    execute $ operation opCode
