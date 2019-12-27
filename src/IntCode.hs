@@ -7,6 +7,13 @@ module IntCode
 
 import           Data.IntMap.Lazy (IntMap, fromDistinctAscList, insert, (!))
 
+data Program = Program
+  { memory             :: IntMap Int
+  , instructionPointer :: Int
+  , input              :: [Int]
+  , output             :: [Int]
+  }
+
 program = fromDistinctAscList . zip [0 ..]
 
 set = insert
