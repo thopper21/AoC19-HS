@@ -54,18 +54,18 @@ writeMem pos = over memory . insert pos
 
 readMem pos = fromJust . lookup pos . view memory
 
-operation 00001  = Ternary Add Position Position Position
-operation 00101  = Ternary Add Immediate Position Position
-operation 01001  = Ternary Add Position Immediate Position
-operation 01101  = Ternary Add Immediate Immediate Position
-operation 00002  = Ternary Mult Position Position Position
-operation 00102  = Ternary Mult Immediate Position Position
-operation 01002  = Ternary Mult Position Immediate Position
-operation 01102  = Ternary Mult Immediate Immediate Position
-operation 003    = Unary In Position
-operation 004    = Unary Out Position
-operation 104    = Unary Out Immediate
-operation 99     = Nullary Terminate
+operation 00001 = Ternary Add Position Position Position
+operation 00101 = Ternary Add Immediate Position Position
+operation 01001 = Ternary Add Position Immediate Position
+operation 01101 = Ternary Add Immediate Immediate Position
+operation 00002 = Ternary Mult Position Position Position
+operation 00102 = Ternary Mult Immediate Position Position
+operation 01002 = Ternary Mult Position Immediate Position
+operation 01102 = Ternary Mult Immediate Immediate Position
+operation 003   = Unary In Position
+operation 004   = Unary Out Position
+operation 104   = Unary Out Immediate
+operation 99    = Nullary Terminate
 
 arg offset = do
   pos <- view ip
