@@ -14,7 +14,7 @@ toProgram noun verb = set 2 verb . set 1 noun . program
 
 result = toInteger . get 0 . run
 
-solveA input = result $ toProgram 12 2 $ parseInput input
+solveA = result . toProgram 12 2 . parseInput
 
 solveB input =
   let parsed = parseInput input
