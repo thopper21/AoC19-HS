@@ -14,9 +14,16 @@ adjacentDigits = or . mapAdjacent (==)
 
 increasingDigits = and . mapAdjacent (<=)
 
-matches x = adjacentDigits x && increasingDigits x
+matchA x = adjacentDigits x && increasingDigits x
 
-solveA _ =
-  let begin = 130254
-      end = 678275
-   in toInteger . length . filter matches . fmap digits $ [begin .. end]
+begin = 130254
+
+end = 678275
+
+solveA _ = toInteger . length . filter matchA . fmap digits $ [begin .. end]
+
+exactAdjacent = elem 2 . fmap length . group
+
+matchB x = exactAdjacent x && increasingDigits x
+
+solveB _ = toInteger . length . filter matchB . fmap digits $ [begin .. end]
