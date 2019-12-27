@@ -117,7 +117,7 @@ writeArg Position offset value = do
 
 incIP offset = run . over ip (+ offset)
 
-ternaryOp fn left right out = do
+binaryOp fn left right out = do
   x <- readArg left 1
   y <- readArg right 2
   incIP 4 . writeArg out 3 (fn x y)
@@ -147,8 +147,8 @@ cmp fn left right out = do
           else 0
   incIP 4 . writeArg out 3 val
 
-execute (Ternary Add left right out)      = ternaryOp (+) left right out
-execute (Ternary Mult left right out)     = ternaryOp (*) left right out
+execute (Ternary Add left right out)      = binaryOp (+) left right out
+execute (Ternary Mult left right out)     = binaryOp (*) left right out
 execute (Unary In argument)               = fromInput argument
 execute (Unary Out argument)              = toOutput argument
 execute (Binary JumpIfTrue compare out)   = jump (/= 0) compare out
