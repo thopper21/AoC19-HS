@@ -80,6 +80,22 @@ operation 01102 = Ternary Mult Immediate Immediate Position
 operation 003   = Unary In Position
 operation 004   = Unary Out Position
 operation 104   = Unary Out Immediate
+operation 0005  = Binary JumpIfTrue Position Position
+operation 0105  = Binary JumpIfTrue Immediate Position
+operation 1005  = Binary JumpIfTrue Position Immediate
+operation 1105  = Binary JumpIfTrue Immediate Immediate
+operation 0006  = Binary JumpIfFalse Position Position
+operation 0106  = Binary JumpIfFalse Immediate Position
+operation 1006  = Binary JumpIfFalse Position Immediate
+operation 1106  = Binary JumpIfFalse Immediate Immediate
+operation 00007 = Ternary LessThan Position Position Position
+operation 00107 = Ternary LessThan Immediate Position Position
+operation 01007 = Ternary LessThan Position Immediate Position
+operation 01107 = Ternary LessThan Immediate Immediate Position
+operation 00008 = Ternary Equals Position Position Position
+operation 00108 = Ternary Equals Immediate Position Position
+operation 01008 = Ternary Equals Position Immediate Position
+operation 01108 = Ternary Equals Immediate Immediate Position
 operation 99    = Nullary Terminate
 
 arg offset = do
@@ -110,11 +126,32 @@ toOutput argument = do
   val <- readArg argument 1
   next 2 . over output (cons val)
 
-execute (Ternary Add left right out)  = ternaryOp (+) left right out
-execute (Ternary Mult left right out) = ternaryOp (*) left right out
-execute (Unary In argument)           = fromInput argument
-execute (Unary Out argument)          = toOutput argument
-execute (Nullary Terminate)           = id
+jump :: (Int -> Bool) -> ParamMode -> ParamMode -> Program -> Program
+jump fn val out = do
+  x <- readArg val 1
+  pos <- readArg out 2
+  if fn x
+    then run . set ip pos
+    else next 3
+
+cmp fn left right out = do
+  x <- readArg left 1
+  y <- readArg right 2
+  let val =
+        if fn x y
+          then 1
+          else 0
+  next 4 . writeArg out 3 val
+
+execute (Ternary Add left right out)      = ternaryOp (+) left right out
+execute (Ternary Mult left right out)     = ternaryOp (*) left right out
+execute (Unary In argument)               = fromInput argument
+execute (Unary Out argument)              = toOutput argument
+execute (Binary JumpIfTrue compare out)   = jump (/= 0) compare out
+execute (Binary JumpIfFalse compare out)  = jump (== 0) compare out
+execute (Ternary LessThan left right out) = cmp (<) left right out
+execute (Ternary Equals left right out)   = cmp (==) left right out
+execute (Nullary Terminate)               = id
 
 run = do
   pos <- view ip

@@ -3,4 +3,4 @@ module Main where
 import           Runner
 
 main :: IO ()
-main = run Day5 Part1
+main = run Day5 Part2
