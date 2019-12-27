@@ -3,9 +3,7 @@ module Day2Solution
   , solveB
   ) where
 
-import           Data.List       (find)
 import           Data.List.Split (splitOn)
-import           Data.Maybe      (fromJust)
 import           IntCode
 
 parseInput = fmap read . splitOn ","
@@ -16,10 +14,15 @@ result = toInteger . get 0 . run
 
 solveA = result . toProgram 12 2 . parseInput
 
-solveB input =
-  let parsed = parseInput input
-      pred (noun, verb) = result (toProgram noun verb parsed) == 19690720
-      (noun, verb) =
-        fromJust $
-        find pred [(noun, verb) | noun <- [0 .. 99], verb <- [0 .. 99]]
-   in toInteger $ 100 * noun + verb
+findInput nouns verbs expected input =
+  head
+    [ (noun, verb)
+    | noun <- nouns
+    , verb <- verbs
+    , result (toProgram noun verb input) == expected
+    ]
+
+output (x, y) = 100 * x + y
+
+solveB =
+  toInteger . output . findInput [0 .. 99] [0 .. 99] 19690720 . parseInput
