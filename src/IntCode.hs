@@ -20,6 +20,30 @@ data Program = Program
   , _output :: [Int]
   }
 
+data TernaryOp
+  = Add
+  | Mult
+
+data UnaryOp
+  = In
+  | Out
+
+data NullaryOp =
+  Terminate
+
+data ParamMode
+  = Immediate
+  | Position
+
+data Operation
+  = Nullary NullaryOp
+  | Unary UnaryOp
+          ParamMode
+  | Ternary TernaryOp
+            ParamMode
+            ParamMode
+            ParamMode
+
 makeLenses ''Program
 
 emptyProgram = Program {_memory = empty, _ip = 0, _input = [], _output = []}
@@ -30,16 +54,25 @@ writeMem pos = over memory . insert pos
 
 readMem pos = fromJust . lookup pos . view memory
 
+operation 1  = Ternary Add Position Position Position
+operation 2  = Ternary Mult Position Position Position
+operation 99 = Nullary Terminate
+
+arg offset program = readMem (view ip program + offset) program
+
+moveIP offset = over ip (+ offset)
+
+binOp fn program =
+  let arg' offset = readMem (arg offset program) program
+      left = arg' 1
+      right = arg' 2
+      result = fn left right
+   in run $ moveIP 4 $ writeMem (arg 3 program) result program
+
+execute (Ternary Add _ _ _)  = binOp (+)
+execute (Ternary Mult _ _ _) = binOp (*)
+execute (Nullary Terminate)  = id
+
 run program =
-  let opCode = readMem (view ip program) program
-      arg offset = readMem (view ip program + offset) program
-      moveIP count = run . over ip (+ count)
-      binOp fn =
-        let left = readMem (arg 1) program
-            right = readMem (arg 2) program
-            result = fn left right
-         in moveIP 4 $ writeMem (arg 3) result program
-   in case opCode of
-        1  -> binOp (+)
-        2  -> binOp (*)
-        99 -> program
+  let op = operation $ readMem (view ip program) program
+   in execute op program
