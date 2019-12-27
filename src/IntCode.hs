@@ -73,34 +73,36 @@ diagnosticCode = head . view output
 
 setInput = set input
 
-operation 00001 = Ternary Add Position Position Position
-operation 00101 = Ternary Add Immediate Position Position
-operation 01001 = Ternary Add Position Immediate Position
-operation 01101 = Ternary Add Immediate Immediate Position
-operation 00002 = Ternary Mult Position Position Position
-operation 00102 = Ternary Mult Immediate Position Position
-operation 01002 = Ternary Mult Position Immediate Position
-operation 01102 = Ternary Mult Immediate Immediate Position
-operation 003   = Unary In Position
-operation 004   = Unary Out Position
-operation 104   = Unary Out Immediate
-operation 0005  = Binary JumpIfTrue Position Position
-operation 0105  = Binary JumpIfTrue Immediate Position
-operation 1005  = Binary JumpIfTrue Position Immediate
-operation 1105  = Binary JumpIfTrue Immediate Immediate
-operation 0006  = Binary JumpIfFalse Position Position
-operation 0106  = Binary JumpIfFalse Immediate Position
-operation 1006  = Binary JumpIfFalse Position Immediate
-operation 1106  = Binary JumpIfFalse Immediate Immediate
-operation 00007 = Ternary LessThan Position Position Position
-operation 00107 = Ternary LessThan Immediate Position Position
-operation 01007 = Ternary LessThan Position Immediate Position
-operation 01107 = Ternary LessThan Immediate Immediate Position
-operation 00008 = Ternary Equals Position Position Position
-operation 00108 = Ternary Equals Immediate Position Position
-operation 01008 = Ternary Equals Position Immediate Position
-operation 01108 = Ternary Equals Immediate Immediate Position
-operation 99    = Nullary Terminate
+ternary op 000 = Ternary op Position Position Position
+ternary op 001 = Ternary op Immediate Position Position
+ternary op 010 = Ternary op Position Immediate Position
+ternary op 011 = Ternary op Immediate Immediate Position
+ternary op 100 = Ternary op Position Position Immediate
+ternary op 101 = Ternary op Immediate Position Immediate
+ternary op 110 = Ternary op Position Immediate Immediate
+ternary op 111 = Ternary op Immediate Immediate Immediate
+
+binary op 00 = Binary op Position Position
+binary op 01 = Binary op Immediate Position
+binary op 10 = Binary op Position Immediate
+binary op 11 = Binary op Immediate Immediate
+
+unary op 0 = Unary op Position
+unary op 1 = Unary op Immediate
+
+nullary op 0 = Nullary op
+
+operator 1 = ternary Add
+operator 2 = ternary Mult
+operator 3 = unary In
+operator 4 = unary Out
+operator 5 = binary JumpIfTrue
+operator 6 = binary JumpIfFalse
+operator 7 = ternary LessThan
+operator 8 = ternary Equals
+operator 99 = nullary Terminate
+
+operation opCode = operator (opCode `mod` 100) (opCode `div` 100)
 
 arg offset = do
   pos <- view ip
