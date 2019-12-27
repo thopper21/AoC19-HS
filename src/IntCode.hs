@@ -72,13 +72,13 @@ writeArg offset value = do
 
 next offset = run . over ip (+ offset)
 
-binOp fn = do
+ternaryOp fn = do
   left <- readArg 1
   right <- readArg 2
   next 4 . writeArg 3 (fn left right)
 
-execute (Ternary Add _ _ _)  = binOp (+)
-execute (Ternary Mult _ _ _) = binOp (*)
+execute (Ternary Add _ _ _)  = ternaryOp (+)
+execute (Ternary Mult _ _ _) = ternaryOp (*)
 execute (Nullary Terminate)  = id
 
 run = do
