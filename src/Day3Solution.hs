@@ -71,8 +71,15 @@ intersection ((x0, y0), (x1, y1)) ((x2, y2), (x3, y3))
 
 manhattan (x, y) = abs x + abs y
 
+fromRight either =
+  case either of
+    Right x -> x
+
+-- Assume input is well-formed
+parseInput = fromRight . parse input ""
+
 solveA s =
-  let Right (p0, p1) = parse input "" s
+  let (p0, p1) = parseInput s
       intersections =
         [ intersection s0 s1
         | s0 <- toSegments p0
@@ -81,4 +88,25 @@ solveA s =
         ]
    in toInteger $ minimum . filter (> 0) . fmap manhattan $ intersections
 
-solveB s = 42
+toStepPositions = scanl stepPositions (0, (0, 0))
+  where
+    stepPositions (steps, pos) move = (steps + snd move, applyMove pos move)
+
+toStepSegments = mapAdjacent f . toStepPositions
+  where
+    f (steps, pos0) (_, pos1) = (steps, (pos0, pos1))
+
+steps (steps0, p0@((x0, y0), _)) (steps1, p1@((x1, y1), _)) =
+  let (x, y) = intersection p0 p1
+   in steps0 + steps1 + abs (x0 - x) + abs (x1 - x) + abs (y0 - y) +
+      abs (y1 - y)
+
+solveB s =
+  let (p0, p1) = parseInput s
+      allSteps =
+        [ steps s0 s1
+        | s0 <- toStepSegments p0
+        , s1 <- toStepSegments p1
+        , intersects (snd s0) (snd s1)
+        ]
+   in toInteger $ minimum . filter (> 0) $ allSteps
