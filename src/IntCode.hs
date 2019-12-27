@@ -115,20 +115,20 @@ writeArg Position offset value = do
   pos <- arg offset
   writeMem pos value
 
-next offset = run . over ip (+ offset)
+incIP offset = run . over ip (+ offset)
 
 ternaryOp fn left right out = do
   x <- readArg left 1
   y <- readArg right 2
-  next 4 . writeArg out 3 (fn x y)
+  incIP 4 . writeArg out 3 (fn x y)
 
 fromInput argument = do
   val <- head . view input
-  next 2 . writeArg argument 1 val . over input tail
+  incIP 2 . writeArg argument 1 val . over input tail
 
 toOutput argument = do
   val <- readArg argument 1
-  next 2 . over output (cons val)
+  incIP 2 . over output (cons val)
 
 jump :: (Int -> Bool) -> ParamMode -> ParamMode -> Program -> Program
 jump fn val out = do
@@ -136,7 +136,7 @@ jump fn val out = do
   pos <- readArg out 2
   if fn x
     then run . set ip pos
-    else next 3
+    else incIP 3
 
 cmp fn left right out = do
   x <- readArg left 1
@@ -145,7 +145,7 @@ cmp fn left right out = do
         if fn x y
           then 1
           else 0
-  next 4 . writeArg out 3 val
+  incIP 4 . writeArg out 3 val
 
 execute (Ternary Add left right out)      = ternaryOp (+) left right out
 execute (Ternary Mult left right out)     = ternaryOp (*) left right out
