@@ -9,7 +9,9 @@ module IntCode
 
 import           Control.Lens
 import           Data.IntMap.Lazy (IntMap, empty, fromDistinctAscList, insert,
-                                   (!))
+                                   lookup)
+import           Data.Maybe
+import           Prelude          hiding (lookup)
 
 data Program = Program
   { _memory :: IntMap Int
@@ -26,7 +28,8 @@ program input = set memory (fromDistinctAscList $ zip [0 ..] input) emptyProgram
 
 setMemory pos = over memory . insert pos
 
-getMemory pos program = view memory program ! pos
+getMemory :: Int -> Program -> Int
+getMemory pos = fromJust . lookup pos . view memory
 
 run program =
   let opCode = getMemory (view ip program) program
