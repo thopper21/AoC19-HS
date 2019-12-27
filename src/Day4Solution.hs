@@ -1,2 +1,5 @@
-module Day4Solution (solveA) where
-    solveA _ = 42
+module Day4Solution
+  ( solveA
+  ) where
+
+solveA _ = 42
