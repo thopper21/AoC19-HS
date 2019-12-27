@@ -5,6 +5,8 @@ module IntCode
   , run
   , writeMem
   , readMem
+  , diagnosticCode
+  , setInput
   ) where
 
 import           Control.Lens
@@ -53,6 +55,10 @@ program input = set memory (fromDistinctAscList $ zip [0 ..] input) emptyProgram
 writeMem pos = over memory . insert pos
 
 readMem pos = fromJust . lookup pos . view memory
+
+diagnosticCode = head . view output
+
+setInput = set input
 
 operation 00001 = Ternary Add Position Position Position
 operation 00101 = Ternary Add Immediate Position Position

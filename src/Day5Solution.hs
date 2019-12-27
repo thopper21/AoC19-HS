@@ -2,4 +2,9 @@ module Day5Solution
   ( solveA
   ) where
 
-solveA _ = 42
+import           Data.List.Split (splitOn)
+import           IntCode
+
+parseInput = fmap read . splitOn ","
+
+solveA = toInteger . diagnosticCode . run . setInput [1] . program . parseInput
