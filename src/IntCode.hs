@@ -1,24 +1,29 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module IntCode
   ( program
   , run
-  , set
-  , get
+  , setMemory
+  , getMemory
   ) where
 
+import           Control.Lens
 import           Data.IntMap.Lazy (IntMap, fromDistinctAscList, insert, (!))
 
 data Program = Program
-  { memory             :: IntMap Int
-  , instructionPointer :: Int
-  , input              :: [Int]
-  , output             :: [Int]
+  { _memory :: IntMap Int
+  , _ip     :: Int
+  , _input  :: [Int]
+  , _output :: [Int]
   }
+
+makeLenses ''Program
 
 program = fromDistinctAscList . zip [0 ..]
 
-set = insert
+setMemory = insert
 
-get = flip (!)
+getMemory = flip (!)
 
 run =
   let run' position program =

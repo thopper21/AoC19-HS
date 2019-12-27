@@ -8,9 +8,9 @@ import           IntCode
 
 parseInput = fmap read . splitOn ","
 
-toProgram noun verb = set 2 verb . set 1 noun . program
+toProgram noun verb = setMemory 2 verb . setMemory 1 noun . program
 
-result = toInteger . get 0 . run
+result = toInteger . getMemory 0 . run
 
 solveA = result . toProgram 12 2 . parseInput
 

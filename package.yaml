@@ -25,6 +25,7 @@ dependencies:
 - split
 - parsec
 - utility-ht
+- lens
 
 library:
   source-dirs: src
