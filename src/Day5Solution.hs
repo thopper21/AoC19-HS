@@ -1,10 +1,15 @@
 module Day5Solution
   ( solveA
+  , solveB
   ) where
 
 import           Data.List.Split (splitOn)
 import           IntCode
 
-parseInput = fmap read . splitOn ","
+solve input =
+  toInteger .
+  diagnosticCode . run . setInput input . program . fmap read . splitOn ","
 
-solveA = toInteger . diagnosticCode . run . setInput [1] . program . parseInput
+solveA = solve [1]
+
+solveB = solve [5]
