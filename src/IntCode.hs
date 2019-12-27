@@ -62,12 +62,15 @@ arg offset program = readMem (view ip program + offset) program
 
 moveIP offset = over ip (+ offset)
 
+readArg offset program = readMem (arg offset program) program
+
+writeArg offset value program = writeMem (arg offset program) value program
+
 binOp fn program =
-  let arg' offset = readMem (arg offset program) program
-      left = arg' 1
-      right = arg' 2
+  let left = readArg 1 program
+      right = readArg 2 program
       result = fn left right
-   in run $ moveIP 4 $ writeMem (arg 3 program) result program
+   in run . moveIP 4 . writeArg 3 result $ program
 
 execute (Ternary Add _ _ _)  = binOp (+)
 execute (Ternary Mult _ _ _) = binOp (*)
