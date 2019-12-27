@@ -1,7 +1,8 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module IntCode
-  ( program
+  ( parseProgram
+  , program
   , run
   , writeMem
   , readMem
@@ -12,6 +13,7 @@ module IntCode
 import           Control.Lens
 import           Data.IntMap.Lazy (IntMap, empty, fromDistinctAscList, insert,
                                    lookup)
+import           Data.List.Split  (splitOn)
 import           Data.Maybe
 import           Prelude          hiding (lookup)
 
@@ -60,6 +62,8 @@ makeLenses ''Program
 emptyProgram = Program {_memory = empty, _ip = 0, _input = [], _output = []}
 
 program input = set memory (fromDistinctAscList $ zip [0 ..] input) emptyProgram
+
+parseProgram = program . fmap read . splitOn ","
 
 writeMem pos = over memory . insert pos
 

@@ -3,16 +3,13 @@ module Day2Solution
   , solveB
   ) where
 
-import           Data.List.Split (splitOn)
 import           IntCode
 
-parseInput = fmap read . splitOn ","
-
-toProgram noun verb = writeMem 2 verb . writeMem 1 noun . program
+toProgram noun verb = writeMem 2 verb . writeMem 1 noun . parseProgram
 
 result = toInteger . readMem 0 . run
 
-solveA = result . toProgram 12 2 . parseInput
+solveA = result . toProgram 12 2
 
 findInput nouns verbs expected input =
   head
@@ -24,5 +21,4 @@ findInput nouns verbs expected input =
 
 output (x, y) = 100 * x + y
 
-solveB =
-  toInteger . output . findInput [0 .. 99] [0 .. 99] 19690720 . parseInput
+solveB = toInteger . output . findInput [0 .. 99] [0 .. 99] 19690720

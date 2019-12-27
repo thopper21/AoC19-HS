@@ -3,12 +3,9 @@ module Day5Solution
   , solveB
   ) where
 
-import           Data.List.Split (splitOn)
 import           IntCode
 
-solve input =
-  toInteger .
-  diagnosticCode . run . setInput input . program . fmap read . splitOn ","
+solve input = toInteger . diagnosticCode . run . setInput input . parseProgram
 
 solveA = solve [1]
 
