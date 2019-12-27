@@ -22,16 +22,22 @@ data Program = Program
   , _output :: [Int]
   }
 
-data TernaryOp
-  = Add
-  | Mult
+data NullaryOp =
+  Terminate
 
 data UnaryOp
   = In
   | Out
 
-data NullaryOp =
-  Terminate
+data BinaryOp
+  = JumpIfTrue
+  | JumpIfFalse
+  
+data TernaryOp
+  = Add
+  | Mult
+  | LessThan
+  | Equals
 
 data ParamMode
   = Immediate
