@@ -3,6 +3,7 @@ module Day3Solution
   , solveB
   ) where
 
+import           Data.List.HT
 import           Data.Maybe
 import           Text.ParserCombinators.Parsec
 
@@ -13,6 +14,7 @@ data Direction
   | L
   | U
   | D
+  deriving (Eq)
 
 type Move = (Direction, Magnitude)
 
@@ -42,38 +44,41 @@ type Position = (Int, Int)
 
 type Segment = (Position, Position)
 
-applyMove (x, y) (R, mag) = (x + mag, y)
-applyMove (x, y) (L, mag) = (x - mag, y)
-applyMove (x, y) (U, mag) = (x, y + mag)
-applyMove (x, y) (D, mag) = (x, y - mag)
+applyMove (x, y) (dir, mag) =
+  case dir of
+    R -> (x + mag, y)
+    L -> (x - mag, y)
+    U -> (x, y + mag)
+    D -> (x, y - mag)
 
-toSegments = toSegments' (0, 0)
-  where
-    toSegments' _ [] = []
-    toSegments' pos (move:moves) =
-      let newPos = applyMove pos move
-          segments = toSegments' newPos moves
-       in (pos, newPos) : segments
+toPositions = scanl applyMove (0, 0)
 
-contains left right middle =
+toSegments = mapAdjacent (,) . toPositions
+
+within middle (left, right) =
   if left < right
     then (left < middle) && (middle < right)
     else (right < middle) && (middle < left)
 
+intersects ((x0, y0), (x1, y1)) ((x2, y2), (x3, y3)) =
+  (y2 `within` (y0, y1) && x0 `within` (x2, x3)) ||
+  (y0 `within` (y2, y3) && x2 `within` (x0, x1))
+
+-- Precondition - intersects s0 s1 == True
 intersection ((x0, y0), (x1, y1)) ((x2, y2), (x3, y3))
-  | (x0 == x1) && (y2 == y3) && contains x2 x3 x0 && contains y0 y1 y2 =
-    Just (x0, y2)
-  | (y0 == y1) && (x2 == x3) && contains y2 y3 y0 && contains x0 x1 x2 =
-    Just (x2, y0)
-  | otherwise = Nothing
+  | x0 == x1 = (x0, y2)
+  | otherwise = (x2, y0)
 
 manhattan (x, y) = abs x + abs y
 
 solveA s =
-  let Right (first, second) = parse input "" s
+  let Right (p0, p1) = parse input "" s
       intersections =
-        catMaybes
-          [intersection l r | l <- toSegments first, r <- toSegments second]
-   in toInteger (minimum . filter (> 0) . fmap manhattan $ intersections)
+        [ intersection s0 s1
+        | s0 <- toSegments p0
+        , s1 <- toSegments p1
+        , intersects s0 s1
+        ]
+   in toInteger $ minimum . filter (> 0) . fmap manhattan $ intersections
 
 solveB s = 42
