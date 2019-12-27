@@ -1,5 +1,6 @@
 module Day4Solution
   ( solveA
+  , solveB
   ) where
 
 import           Data.List.HT

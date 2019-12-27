@@ -27,6 +27,7 @@ solution Day2 Part2 = D2.solveB
 solution Day3 Part1 = D3.solveA
 solution Day3 Part2 = D3.solveB
 solution Day4 Part1 = D4.solveA
+solution Day4 Part2 = D4.solveB
 
 input day = "input/Day" ++ show (toDayNumber day) ++ ".txt"
 
