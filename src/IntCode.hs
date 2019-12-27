@@ -32,7 +32,7 @@ data UnaryOp
 data BinaryOp
   = JumpIfTrue
   | JumpIfFalse
-  
+
 data TernaryOp
   = Add
   | Mult
@@ -47,6 +47,9 @@ data Operation
   = Nullary NullaryOp
   | Unary UnaryOp
           ParamMode
+  | Binary BinaryOp
+           ParamMode
+           ParamMode
   | Ternary TernaryOp
             ParamMode
             ParamMode
