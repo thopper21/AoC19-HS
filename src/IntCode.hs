@@ -130,7 +130,6 @@ toOutput argument = do
   val <- readArg argument 1
   incIP 2 . over output (cons val)
 
-jump :: (Int -> Bool) -> ParamMode -> ParamMode -> Program -> Program
 jump fn val out = do
   x <- readArg val 1
   pos <- readArg out 2
