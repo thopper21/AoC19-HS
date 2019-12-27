@@ -62,23 +62,24 @@ arg offset = do
   pos <- view ip
   readMem (pos + offset)
 
-readArg offset = do
+readArg Immediate offset = arg offset
+readArg Position offset = do
   pos <- arg offset
   readMem pos
 
-writeArg offset value = do
+writeArg Position offset value = do
   pos <- arg offset
   writeMem pos value
 
 next offset = run . over ip (+ offset)
 
-ternaryOp fn = do
-  left <- readArg 1
-  right <- readArg 2
-  next 4 . writeArg 3 (fn left right)
+ternaryOp fn left right out = do
+  x <- readArg left 1
+  y <- readArg right 2
+  next 4 . writeArg out 3 (fn x y)
 
-execute (Ternary Add _ _ _)  = ternaryOp (+)
-execute (Ternary Mult _ _ _) = ternaryOp (*)
+execute (Ternary Add left right out)  = ternaryOp (+) left right out
+execute (Ternary Mult left right out) = ternaryOp (*) left right out
 execute (Nullary Terminate)  = id
 
 run = do
