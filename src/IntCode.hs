@@ -73,33 +73,27 @@ diagnosticCode = head . view output
 
 setInput = set input
 
-ternary op 000 = Ternary op Position Position Position
-ternary op 001 = Ternary op Immediate Position Position
-ternary op 010 = Ternary op Position Immediate Position
-ternary op 011 = Ternary op Immediate Immediate Position
-ternary op 100 = Ternary op Position Position Immediate
-ternary op 101 = Ternary op Immediate Position Immediate
-ternary op 110 = Ternary op Position Immediate Immediate
-ternary op 111 = Ternary op Immediate Immediate Immediate
+paramMode 0 = Position
+paramMode 1 = Immediate
 
-binary op 00 = Binary op Position Position
-binary op 01 = Binary op Immediate Position
-binary op 10 = Binary op Position Immediate
-binary op 11 = Binary op Immediate Immediate
+param (f, x) = (f $ paramMode (x `mod` 10), x `div` 10)
 
-unary op 0 = Unary op Position
-unary op 1 = Unary op Immediate
+ternary op params = fst . param . param . param $ (Ternary op, params)
+
+binary op params = fst . param . param $ (Binary op, params)
+
+unary op params = fst . param $ (Unary op, params)
 
 nullary op 0 = Nullary op
 
-operator 1 = ternary Add
-operator 2 = ternary Mult
-operator 3 = unary In
-operator 4 = unary Out
-operator 5 = binary JumpIfTrue
-operator 6 = binary JumpIfFalse
-operator 7 = ternary LessThan
-operator 8 = ternary Equals
+operator 1  = ternary Add
+operator 2  = ternary Mult
+operator 3  = unary In
+operator 4  = unary Out
+operator 5  = binary JumpIfTrue
+operator 6  = binary JumpIfFalse
+operator 7  = ternary LessThan
+operator 8  = ternary Equals
 operator 99 = nullary Terminate
 
 operation opCode = operator (opCode `mod` 100) (opCode `div` 100)
