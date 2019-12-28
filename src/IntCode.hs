@@ -100,59 +100,62 @@ operation opCode = operator (opCode `mod` 100) (opCode `div` 100)
 
 arg offset = do
   pos <- view ip
-  readMem (pos + offset)
+  readMem $ pos + offset
 
 readArg Immediate offset = arg offset
 readArg Position offset = do
   pos <- arg offset
   readMem pos
 
+writeArg Immediate _ _ = error "Cannot write to immediate position"
 writeArg Position offset value = do
   pos <- arg offset
   writeMem pos value
 
-incIP offset = run . over ip (+ offset)
+runNext offset = run . over ip (+ offset)
 
-binaryOp fn left right out = do
-  x <- readArg left 1
-  y <- readArg right 2
-  incIP 4 . writeArg out 3 (fn x y)
+binaryOp op leftParam rightParam outParam = do
+  left <- readArg leftParam 1
+  right <- readArg rightParam 2
+  runNext 4 . writeArg outParam 3 (op left right)
 
-fromInput argument = do
+fromInput outParam = do
   val <- head . view input
-  incIP 2 . writeArg argument 1 val . over input tail
+  runNext 2 . writeArg outParam 1 val . over input tail
 
-toOutput argument = do
-  val <- readArg argument 1
-  incIP 2 . over output (cons val)
+toOutput inParam = do
+  val <- readArg inParam 1
+  runNext 2 . over output (cons val)
 
-jump fn val out = do
-  x <- readArg val 1
-  pos <- readArg out 2
-  if fn x
+jump jumpIf valParam posParam = do
+  val <- readArg valParam 1
+  pos <- readArg posParam 2
+  if jumpIf val
     then run . set ip pos
-    else incIP 3
+    else runNext 3
 
-cmp fn left right out = do
-  x <- readArg left 1
-  y <- readArg right 2
-  let val =
-        if fn x y
+cmp fn leftParam rightParam outParam = do
+  left <- readArg leftParam 1
+  right <- readArg rightParam 2
+  let out =
+        if fn left right
           then 1
           else 0
-  incIP 4 . writeArg out 3 val
+  runNext 4 . writeArg outParam 3 out
 
 execute (Ternary Add left right out)      = binaryOp (+) left right out
 execute (Ternary Mult left right out)     = binaryOp (*) left right out
-execute (Unary In argument)               = fromInput argument
-execute (Unary Out argument)              = toOutput argument
+execute (Unary In out)                    = fromInput out
+execute (Unary Out val)                   = toOutput val
 execute (Binary JumpIfTrue compare out)   = jump (/= 0) compare out
 execute (Binary JumpIfFalse compare out)  = jump (== 0) compare out
 execute (Ternary LessThan left right out) = cmp (<) left right out
 execute (Ternary Equals left right out)   = cmp (==) left right out
 execute (Nullary Terminate)               = id
 
+exec = execute . operation
+
 run = do
   pos <- view ip
   opCode <- readMem pos
-  execute $ operation opCode
+  exec opCode
