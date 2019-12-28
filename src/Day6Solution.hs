@@ -23,6 +23,6 @@ test =
 
 parse _ = test
 
-depths _ forest = 0 : fmap (+1) (concat forest)
+depths _ forest = 0 : fmap (+ 1) (concat forest)
 
 solveA = toInteger . sum . foldTree depths . parse
