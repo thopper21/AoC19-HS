@@ -22,10 +22,11 @@ description:         Please see the README on GitHub at <https://github.com/thop
 dependencies:
 - base >= 4.7 && < 5
 - containers
-- split
-- parsec
-- utility-ht
 - lens
+- multimap
+- parsec
+- split
+- utility-ht
 
 library:
   source-dirs: src

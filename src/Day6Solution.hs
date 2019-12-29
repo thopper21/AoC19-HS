@@ -3,16 +3,15 @@ module Day6Solution
   , solveB
   ) where
 
+import           Control.Monad
 import           Data.List.Split
-import           Data.Map        (empty, fromListWith, lookup)
 import           Data.Maybe
+import           Data.MultiMap   (empty, fromList, lookup)
 import           Data.Tree
 import           Prelude         hiding (lookup)
 
 toTree input =
-  let listVal (k, v) = (k, [v])
-      map = fromListWith (++) (listVal <$> input)
-      forest body = (body, fromMaybe [] $ lookup body map)
+  let forest = (,) `ap` flip lookup (fromList input)
    in unfoldTree forest "COM"
 
 parse =
@@ -26,7 +25,11 @@ depths = depths' 0
 
 solveA = toInteger . depths . parse
 
-data Found = Nobody | You Int | Santa Int | Both Int
+data Found
+  = Nobody
+  | You Int
+  | Santa Int
+  | Both Int
 
 result (Both x) = x
 
@@ -34,17 +37,16 @@ found "YOU" _ = You 0
 found "SAN" _ = Santa 0
 found _ [] = Nobody
 found _ forest =
-    let
-        found' Nobody Nobody = Nobody
-        found' (Santa x) (You y) = Both $ x + y - 1
-        found' (You y) (Santa x) = Both $ x + y - 1
-        found' (Santa x) _ = Santa x
-        found' _ (Santa x) = Santa $ x + 1
-        found' (You x) _ = You x
-        found' _ (You x) = You $ x + 1
-        found' (Both x) _ = Both x
-        found' _ (Both x) = Both x
-    in foldl found' Nobody forest
+  let found' Nobody Nobody     = Nobody
+      found' (Santa x) (You y) = Both $ x + y - 1
+      found' (You y) (Santa x) = Both $ x + y - 1
+      found' (Santa x) _       = Santa x
+      found' _ (Santa x)       = Santa $ x + 1
+      found' (You x) _         = You x
+      found' _ (You x)         = You $ x + 1
+      found' (Both x) _        = Both x
+      found' _ (Both x)        = Both x
+   in foldl found' Nobody forest
 
 distance = result . foldTree found
 
