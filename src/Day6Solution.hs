@@ -8,23 +8,6 @@ import           Data.Tree
 import           Prelude    hiding (lookup)
 import           Data.List.Split
 
-testTree =
-  Node
-    "COM"
-    [ Node
-        "B"
-        [ Node "G" [Node "H" []]
-        , Node
-            "C"
-            [ Node
-                "D"
-                [ Node "I" []
-                , Node "E" [Node "F" [], Node "J" [Node "K" [Node "L" []]]]
-                ]
-            ]
-        ]
-    ]
-
 testInput =
   [ ("COM", "B")
   , ("B", "C")
