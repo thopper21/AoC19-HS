@@ -2,9 +2,12 @@ module Day6Solution
   ( solveA
   ) where
 
+import           Data.Map
+import           Data.Maybe
 import           Data.Tree
+import           Prelude    hiding (lookup)
 
-test =
+testTree =
   Node
     "COM"
     [ Node
@@ -21,8 +24,31 @@ test =
         ]
     ]
 
-parse _ = test
+testInput =
+  [ ("COM", "B")
+  , ("B", "C")
+  , ("C", "D")
+  , ("D", "E")
+  , ("E", "F")
+  , ("B", "G")
+  , ("G", "H")
+  , ("D", "I")
+  , ("E", "J")
+  , ("J", "K")
+  , ("K", "L")
+  ]
 
-depths _ forest = 0 : fmap (+ 1) (concat forest)
+toTree input =
+  let listVal (k, v) = (k, [v])
+      map = fromListWith (++) (listVal <$> input)
+      forest body = (body, fromMaybe [] $ lookup body map)
+   in unfoldTree forest "COM"
 
-solveA = toInteger . sum . foldTree depths . parse
+parse _ = toTree testInput
+
+depths = depths' 0
+  where
+    depths' depth (Node _ []) = depth
+    depths' depth (Node _ forest) = depth + sum (depths' (depth + 1) <$> forest)
+
+solveA = toInteger . depths . parse
