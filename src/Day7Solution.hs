@@ -1,5 +1,6 @@
 module Day7Solution
   ( solveA
+  , solveB
   ) where
 
 import           Data.List
@@ -14,3 +15,5 @@ maxThruster program =
   maximum $ fmap (runThrusters program) (permutations [0 .. 4])
 
 solveA = toInteger . maxThruster . parseProgram
+
+solveB _ = 42
