@@ -6,6 +6,7 @@ import           Data.Map
 import           Data.Maybe
 import           Data.Tree
 import           Prelude    hiding (lookup)
+import           Data.List.Split
 
 testTree =
   Node
@@ -44,7 +45,9 @@ toTree input =
       forest body = (body, fromMaybe [] $ lookup body map)
    in unfoldTree forest "COM"
 
-parse _ = toTree testInput
+parse =
+  let toTuple [body, satellite] = (body, satellite)
+   in toTree . fmap (toTuple . splitOn ")") . lines
 
 depths = depths' 0
   where
