@@ -2,42 +2,11 @@ module Day6Solution
   ( solveA
   ) where
 
+import           Data.List.Split
 import           Data.Map
 import           Data.Maybe
 import           Data.Tree
-import           Prelude    hiding (lookup)
-import           Data.List.Split
-
-testTree =
-  Node
-    "COM"
-    [ Node
-        "B"
-        [ Node "G" [Node "H" []]
-        , Node
-            "C"
-            [ Node
-                "D"
-                [ Node "I" []
-                , Node "E" [Node "F" [], Node "J" [Node "K" [Node "L" []]]]
-                ]
-            ]
-        ]
-    ]
-
-testInput =
-  [ ("COM", "B")
-  , ("B", "C")
-  , ("C", "D")
-  , ("D", "E")
-  , ("E", "F")
-  , ("B", "G")
-  , ("G", "H")
-  , ("D", "I")
-  , ("E", "J")
-  , ("J", "K")
-  , ("K", "L")
-  ]
+import           Prelude         hiding (lookup)
 
 toTree input =
   let listVal (k, v) = (k, [v])
