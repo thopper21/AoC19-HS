@@ -30,20 +30,22 @@ data Found = Nobody | You Int | Santa Int | Both Int
 
 result (Both x) = x
 
-distance (Node "YOU" _) = You 0
-distance (Node "SAN" _) = Santa 0
-distance (Node _ []) = Nobody
-distance (Node _ satellites) =
+found "YOU" _ = You 0
+found "SAN" _ = Santa 0
+found _ [] = Nobody
+found _ forest =
     let
-        found Nobody Nobody = Nobody
-        found (Santa x) (You y) = Both $ x + y - 1
-        found (You y) (Santa x) = Both $ x + y - 1
-        found (Santa x) _ = Santa x
-        found _ (Santa x) = Santa $ x + 1
-        found (You x) _ = You x
-        found _ (You x) = You $ x + 1
-        found (Both x) _ = Both x
-        found _ (Both x) = Both x
-    in foldl found Nobody (distance <$> satellites)
+        found' Nobody Nobody = Nobody
+        found' (Santa x) (You y) = Both $ x + y - 1
+        found' (You y) (Santa x) = Both $ x + y - 1
+        found' (Santa x) _ = Santa x
+        found' _ (Santa x) = Santa $ x + 1
+        found' (You x) _ = You x
+        found' _ (You x) = You $ x + 1
+        found' (Both x) _ = Both x
+        found' _ (Both x) = Both x
+    in foldl found' Nobody forest
 
-solveB = toInteger . result . distance . parse
+distance = result . foldTree found
+
+solveB = toInteger . distance . parse
