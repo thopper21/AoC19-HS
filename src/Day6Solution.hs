@@ -20,6 +20,8 @@ testInput =
   , ("E", "J")
   , ("J", "K")
   , ("K", "L")
+  , ("K", "YOU")
+  , ("I", "SAN")
   ]
 
 toTree input =
