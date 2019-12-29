@@ -26,25 +26,24 @@ depths = depths' 0
 
 solveA = toInteger . depths . parse
 
-distance = tupleDistance . distance' 0
-  where
-    tupleDistance (Just x, Just y) = x + y
-    distance' depth (Node "YOU" _) = (Just depth, Nothing)
-    distance' depth (Node "SAN" _) = (Nothing, Just depth)
-    distance' depth (Node _ []) = (Nothing, Nothing)
-    distance' depth (Node _ satellites) =
-      let pairs = distance' (depth + 1) <$> satellites
-          m (Just x, Just y) _ = (Just x, Just y)
-          m _ (Just x, Just y) = (Just x, Just y)
-          m (Just x, Nothing) (Nothing, Just y) =
-            (Just (x - depth - 1), Just (y - depth - 1))
-          m (Nothing, Just y) (Just x, Nothing) =
-            (Just (x - depth - 1), Just (y - depth - 1))
-          m (Just x, Nothing) _ = (Just x, Nothing)
-          m _ (Nothing, Just y) = (Nothing, Just y)
-          m _ (Just x, Nothing) = (Just x, Nothing)
-          m (Nothing, Just y) _ = (Nothing, Just y)
-          m _ _ = (Nothing, Nothing)
-       in foldl m (Nothing, Nothing) pairs
+data Found = Nobody | You Int | Santa Int | Both Int
 
-solveB = toInteger . distance . parse
+result (Both x) = x
+
+distance (Node "YOU" _) = You 0
+distance (Node "SAN" _) = Santa 0
+distance (Node _ []) = Nobody
+distance (Node _ satellites) =
+    let
+        found Nobody Nobody = Nobody
+        found (Santa x) (You y) = Both $ x + y - 1
+        found (You y) (Santa x) = Both $ x + y - 1
+        found (Santa x) _ = Santa x
+        found _ (Santa x) = Santa $ x + 1
+        found (You x) _ = You x
+        found _ (You x) = You $ x + 1
+        found (Both x) _ = Both x
+        found _ (Both x) = Both x
+    in foldl found Nobody (distance <$> satellites)
+
+solveB = toInteger . result . distance . parse
