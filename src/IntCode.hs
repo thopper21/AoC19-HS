@@ -7,7 +7,7 @@ module IntCode
   , writeMem
   , readMem
   , lastOutput
-  , ProgramState (..)
+  , ProgramState(..)
   ) where
 
 import           Control.Lens
