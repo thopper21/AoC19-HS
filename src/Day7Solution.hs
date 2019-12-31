@@ -20,7 +20,8 @@ runThrusters program settings =
   let [a, b, c, d, e] = fst . startThruster program <$> settings
    in runFeedbackThrusters 0 a b c d e
 
-maxSignal settings program = maximum $ runThrusters program <$> permutations settings
+maxSignal settings program =
+  maximum $ runThrusters program <$> permutations settings
 
 solve settings = toInteger . maxSignal settings . parseProgram
 
