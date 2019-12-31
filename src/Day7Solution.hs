@@ -18,16 +18,11 @@ maxThruster program = maximum $ runThrusters program <$> permutations [0 .. 4]
 
 solveA = toInteger . maxThruster . parseProgram
 
-runFeedbackThrusters input Terminated Terminated Terminated Terminated Terminated =
-  input
-runFeedbackThrusters input (AwaitingInput contA) (AwaitingInput contB) (AwaitingInput contC) (AwaitingInput contD) (AwaitingInput contE) =
-  let (stateA, progA) = contA input
-      (stateB, progB) = contB $ lastOutput progA
-      (stateC, progC) = contC $ lastOutput progB
-      (stateD, progD) = contD $ lastOutput progC
-      (stateE, progE) = contE $ lastOutput progD
-      loopOutput = lastOutput progE
-   in runFeedbackThrusters loopOutput stateA stateB stateC stateD stateE
+runFeedbackThrusters input Terminated _ _ _ _ = input
+runFeedbackThrusters input (AwaitingInput resume) stateB stateC stateD stateE =
+  let (stateA, program) = resume input
+      loopOutput = lastOutput program
+   in runFeedbackThrusters loopOutput stateB stateC stateD stateE stateA
 
 startThruster program setting =
   let (AwaitingInput resume, _) = run program
