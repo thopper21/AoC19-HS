@@ -9,7 +9,7 @@ toProgram noun verb = writeMem 2 verb . writeMem 1 noun . parseProgram
 
 result program =
   let
-    Terminated program' = run program
+    (Terminated, program') = run program
   in
      toInteger $ readMem 0 program'
 

@@ -10,9 +10,9 @@ runThrusters program = foldl runThrusterPhase 0
   where
     runThrusterPhase prevOut currIn =
         let
-            AwaitingInput resume = run program
-            AwaitingInput resume' = resume currIn
-            Terminated program' = resume' prevOut
+            (AwaitingInput resume, _) = run program
+            (AwaitingInput resume', _) = resume currIn
+            (Terminated, program') = resume' prevOut
         in lastOutput program'
 
 maxThruster program =

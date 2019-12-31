@@ -56,10 +56,10 @@ data Operation
             ParamMode
             ParamMode
 
-type ResumeProgram = Int -> ProgramState
+type ResumeProgram = Int -> (ProgramState, Program)
 
 data ProgramState
-  = Terminated Program
+  = Terminated
   | AwaitingInput ResumeProgram
 
 makeLenses ''Program
@@ -122,7 +122,7 @@ binaryOp op leftParam rightParam outParam = do
   right <- readArg rightParam 2
   runNext 4 . writeArg outParam 3 (op left right)
 
-fromInput outParam program = AwaitingInput resume
+fromInput outParam program = (AwaitingInput resume, program)
   where
     resume val = runNext 2 $ writeArg outParam 1 val program
 
@@ -146,7 +146,7 @@ cmp fn leftParam rightParam outParam = do
           else 0
   runNext 4 . writeArg outParam 3 out
 
-terminate = Terminated
+terminate = (,) Terminated
 
 execute (Ternary Add left right out)      = binaryOp (+) left right out
 execute (Ternary Mult left right out)     = binaryOp (*) left right out
