@@ -18,9 +18,9 @@ import           Data.Maybe
 import           Prelude          hiding (lookup)
 
 data Program = Program
-  { _memory :: IntMap Int
+  { _memory :: IntMap Integer
   , _ip     :: Int
-  , _output :: [Int]
+  , _output :: [Integer]
   }
 
 data NullaryOp =
@@ -56,7 +56,7 @@ data Operation
             ParamMode
             ParamMode
 
-type ResumeProgram = Int -> (ProgramState, Program)
+type ResumeProgram = Integer -> (ProgramState, Program)
 
 data ProgramState
   = Terminated
@@ -103,7 +103,7 @@ operation opCode = operator (opCode `mod` 100) (opCode `div` 100)
 
 arg offset = do
   pos <- view ip
-  readMem $ pos + offset
+  fromInteger . readMem (pos + offset)
 
 readArg Immediate offset = arg offset
 readArg Position offset = do
@@ -134,7 +134,7 @@ jump jumpIf valParam posParam = do
   val <- readArg valParam 1
   pos <- readArg posParam 2
   if jumpIf val
-    then run . set ip pos
+    then run . set ip (fromInteger pos)
     else runNext 3
 
 cmp fn leftParam rightParam outParam = do
