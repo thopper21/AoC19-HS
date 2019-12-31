@@ -1,21 +1,23 @@
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE TemplateHaskell  #-}
 
 module IntCode
   ( parseProgram
   , program
   , run
-  , writeMem
-  , readMem
+  , writeMemory
+  , readMemory
   , lastOutput
   , ProgramState(..)
   ) where
 
 import           Control.Lens
-import           Data.IntMap.Lazy (IntMap, empty, fromDistinctAscList, insert,
-                                   lookup)
-import           Data.List.Split  (splitOn)
+import           Control.Monad.State
+import           Data.IntMap.Lazy    (IntMap, empty, fromDistinctAscList,
+                                      insert, lookup)
+import           Data.List.Split     (splitOn)
 import           Data.Maybe
-import           Prelude          hiding (lookup)
+import           Prelude             hiding (lookup)
 
 data Program = Program
   { _memory :: IntMap Integer
@@ -70,9 +72,13 @@ program input = set memory (fromDistinctAscList $ zip [0 ..] input) emptyProgram
 
 parseProgram = program . fmap read . splitOn ","
 
-writeMem pos = over memory . insert pos
+writeMemory pos = over memory . insert pos
 
-readMem pos = fromJust . lookup pos . view memory
+writeMem pos = modify . writeMemory pos
+
+readMemory pos = fromJust . lookup pos . view memory
+
+readMem pos = gets $ readMemory pos
 
 lastOutput = head . view output
 
@@ -101,41 +107,58 @@ operator 99 = nullary Terminate
 
 operation opCode = operator (opCode `mod` 100) (opCode `div` 100)
 
+getIP = gets $ view ip
+
 arg offset = do
-  pos <- view ip
-  fromInteger . readMem (pos + offset)
+  pos <- getIP
+  readMem (pos + offset)
 
 readArg Immediate offset = arg offset
 readArg Position offset = do
   pos <- arg offset
-  readMem pos
+  readMem . fromInteger $ pos
 
 writeArg Immediate _ _ = error "Cannot write to immediate position"
 writeArg Position offset value = do
   pos <- arg offset
-  writeMem pos value
+  writeMem (fromInteger pos) value
 
-runNext offset = run . over ip (+ offset)
+moveIP offset = modify $ over ip (+ offset)
 
 binaryOp op leftParam rightParam outParam = do
   left <- readArg leftParam 1
   right <- readArg rightParam 2
-  runNext 4 . writeArg outParam 3 (op left right)
+  let result = op left right
+  writeArg outParam 3 result
+  moveIP 4
+  continue
 
-fromInput outParam program = (AwaitingInput resume, program)
+fromInput outParam = gets $ AwaitingInput . continuation
   where
-    resume val = runNext 2 $ writeArg outParam 1 val program
+    resume val = do
+      writeArg outParam 1 val
+      moveIP 2
+      continue
+    continuation = flip $ runState . resume
+
+outputValue = modify . over output . cons
 
 toOutput inParam = do
   val <- readArg inParam 1
-  runNext 2 . over output (cons val)
+  outputValue val
+  moveIP 2
+  continue
+
+setIP = modify . set ip
 
 jump jumpIf valParam posParam = do
   val <- readArg valParam 1
-  pos <- readArg posParam 2
   if jumpIf val
-    then run . set ip (fromInteger pos)
-    else runNext 3
+    then do
+      pos <- readArg posParam 2
+      setIP $ fromInteger pos
+    else moveIP 3
+  continue
 
 cmp fn leftParam rightParam outParam = do
   left <- readArg leftParam 1
@@ -144,9 +167,11 @@ cmp fn leftParam rightParam outParam = do
         if fn left right
           then 1
           else 0
-  runNext 4 . writeArg outParam 3 out
+  writeArg outParam 3 out
+  moveIP 4
+  continue
 
-terminate = (,) Terminated
+terminate = return Terminated
 
 execute (Ternary Add left right out)      = binaryOp (+) left right out
 execute (Ternary Mult left right out)     = binaryOp (*) left right out
@@ -158,9 +183,9 @@ execute (Ternary LessThan left right out) = cmp (<) left right out
 execute (Ternary Equals left right out)   = cmp (==) left right out
 execute (Nullary Terminate)               = terminate
 
-exec = execute . operation
-
-run = do
-  pos <- view ip
+continue = do
+  pos <- getIP
   opCode <- readMem pos
-  exec opCode
+  execute . operation $ opCode
+
+run = runState continue

@@ -5,11 +5,11 @@ module Day2Solution
 
 import           IntCode
 
-toProgram noun verb = writeMem 2 verb . writeMem 1 noun . parseProgram
+toProgram noun verb = writeMemory 2 verb . writeMemory 1 noun . parseProgram
 
 result program =
   let (Terminated, program') = run program
-   in readMem 0 program'
+   in readMemory 0 program'
 
 solveA = result . toProgram 12 2
 
