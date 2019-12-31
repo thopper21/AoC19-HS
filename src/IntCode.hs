@@ -74,7 +74,7 @@ parseProgram = program . fmap read . splitOn ","
 
 writeMemory pos = over memory . insert pos
 
-readMemory pos = fromJust . lookup pos . view memory
+readMemory pos = fromMaybe 0 . lookup pos . view memory
 
 readMem pos = gets $ readMemory pos
 
