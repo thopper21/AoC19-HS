@@ -74,8 +74,6 @@ parseProgram = program . fmap read . splitOn ","
 
 writeMemory pos = over memory . insert pos
 
-writeMem pos = modify . writeMemory pos
-
 readMemory pos = fromJust . lookup pos . view memory
 
 readMem pos = gets $ readMemory pos
@@ -121,7 +119,9 @@ readArg Position offset = do
 writeArg Immediate _ _ = error "Cannot write to immediate position"
 writeArg Position offset value = do
   pos <- arg offset
-  writeMem (fromInteger pos) value
+  writeMem pos value
+  where
+    writeMem pos = modify . writeMemory (fromInteger pos)
 
 moveIP offset = modify $ over ip (+ offset)
 
@@ -141,15 +141,13 @@ fromInput outParam = gets $ AwaitingInput . continuation
       continue
     continuation = flip $ runState . resume
 
-outputValue = modify . over output . cons
-
 toOutput inParam = do
   val <- readArg inParam 1
   outputValue val
   moveIP 2
   continue
-
-setIP = modify . set ip
+  where
+    outputValue = modify . over output . cons
 
 jump valParam jumpIf posParam = do
   val <- readArg valParam 1
@@ -159,6 +157,8 @@ jump valParam jumpIf posParam = do
       setIP $ fromInteger pos
     else moveIP 3
   continue
+  where
+    setIP = modify . set ip
 
 cmp leftParam fn rightParam outParam = do
   left <- readArg leftParam 1
