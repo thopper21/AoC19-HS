@@ -5,7 +5,7 @@ module Day5Solution
 
 import           IntCode
 
-solve input = toInteger . diagnosticCode . run . setInput input . parseProgram
+solve input = toInteger . lastOutput . run . setInput input . parseProgram
 
 solveA = solve [1]
 

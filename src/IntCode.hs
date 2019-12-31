@@ -6,7 +6,7 @@ module IntCode
   , run
   , writeMem
   , readMem
-  , diagnosticCode
+  , lastOutput
   , setInput
   ) where
 
@@ -69,7 +69,7 @@ writeMem pos = over memory . insert pos
 
 readMem pos = fromJust . lookup pos . view memory
 
-diagnosticCode = head . view output
+lastOutput = head . view output
 
 setInput = set input
 
