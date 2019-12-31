@@ -7,7 +7,7 @@ module IntCode
   , writeMem
   , readMem
   , lastOutput
-  , setInput
+  , ProgramState (..)
   ) where
 
 import           Control.Lens
@@ -20,7 +20,6 @@ import           Prelude          hiding (lookup)
 data Program = Program
   { _memory :: IntMap Int
   , _ip     :: Int
-  , _input  :: [Int]
   , _output :: [Int]
   }
 
@@ -57,12 +56,15 @@ data Operation
             ParamMode
             ParamMode
 
-data ProgramState =
-  Terminated
+type ResumeProgram = Int -> ProgramState
+
+data ProgramState
+  = Terminated Program
+  | AwaitingInput ResumeProgram
 
 makeLenses ''Program
 
-emptyProgram = Program {_memory = empty, _ip = 0, _input = [], _output = []}
+emptyProgram = Program {_memory = empty, _ip = 0, _output = []}
 
 program input = set memory (fromDistinctAscList $ zip [0 ..] input) emptyProgram
 
@@ -72,9 +74,7 @@ writeMem pos = over memory . insert pos
 
 readMem pos = fromJust . lookup pos . view memory
 
-lastOutput = head . view output . snd
-
-setInput = set input
+lastOutput = head . view output
 
 paramMode 0 = Position
 paramMode 1 = Immediate
@@ -122,9 +122,9 @@ binaryOp op leftParam rightParam outParam = do
   right <- readArg rightParam 2
   runNext 4 . writeArg outParam 3 (op left right)
 
-fromInput outParam = do
-  val <- head . view input
-  runNext 2 . writeArg outParam 1 val . over input tail
+fromInput outParam program = AwaitingInput resume
+  where
+    resume val = runNext 2 $ writeArg outParam 1 val program
 
 toOutput inParam = do
   val <- readArg inParam 1
@@ -146,7 +146,7 @@ cmp fn leftParam rightParam outParam = do
           else 0
   runNext 4 . writeArg outParam 3 out
 
-terminate program = (Terminated, program)
+terminate = Terminated
 
 execute (Ternary Add left right out)      = binaryOp (+) left right out
 execute (Ternary Mult left right out)     = binaryOp (*) left right out

@@ -5,8 +5,14 @@ module Day5Solution
 
 import           IntCode
 
-solve input = toInteger . lastOutput . run . setInput input . parseProgram
+runProgram input program =
+  let
+    AwaitingInput resume = run program
+    Terminated program' = resume input
+  in lastOutput program'
 
-solveA = solve [1]
+solve input = toInteger . runProgram input . parseProgram
 
-solveB = solve [5]
+solveA = solve 1
+
+solveB = solve 5

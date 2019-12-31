@@ -9,7 +9,11 @@ import           IntCode
 runThrusters program = foldl runThrusterPhase 0
   where
     runThrusterPhase prevOut currIn =
-      lastOutput . run $ setInput [currIn, prevOut] program
+        let
+            AwaitingInput resume = run program
+            AwaitingInput resume' = resume currIn
+            Terminated program' = resume' prevOut
+        in lastOutput program'
 
 maxThruster program =
   maximum $ fmap (runThrusters program) (permutations [0 .. 4])
