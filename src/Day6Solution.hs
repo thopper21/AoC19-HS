@@ -23,7 +23,7 @@ depths = depths' 0
     depths' depth (Node _ []) = depth
     depths' depth (Node _ forest) = depth + sum (depths' (depth + 1) <$> forest)
 
-solveA = toInteger . depths . parse
+solveA = depths . parse
 
 data Found
   = Nobody
@@ -50,4 +50,4 @@ found _ forest =
 
 distance = result . foldTree found
 
-solveB = toInteger . distance . parse
+solveB = distance . parse

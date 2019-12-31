@@ -86,7 +86,7 @@ solveA s =
         , s1 <- toSegments p1
         , intersects s0 s1
         ]
-   in toInteger $ minimum . filter (> 0) . fmap manhattan $ intersections
+   in minimum . filter (> 0) . fmap manhattan $ intersections
 
 toStepPositions = scanl stepPositions (0, (0, 0))
   where
@@ -109,4 +109,4 @@ solveB s =
         , s1 <- toStepSegments p1
         , intersects (snd s0) (snd s1)
         ]
-   in toInteger $ minimum . filter (> 0) $ allSteps
+   in minimum . filter (> 0) $ allSteps

@@ -10,7 +10,7 @@ runProgram input program =
       (Terminated, program') = resume input
    in lastOutput program'
 
-solve input = toInteger . runProgram input . parseProgram
+solve input = runProgram input . parseProgram
 
 solveA = solve 1
 

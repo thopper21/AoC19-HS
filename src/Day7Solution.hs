@@ -23,7 +23,7 @@ runThrusters program settings =
 maxSignal settings program =
   maximum $ runThrusters program <$> permutations settings
 
-solve settings = toInteger . maxSignal settings . parseProgram
+solve settings = maxSignal settings . parseProgram
 
 solveA = solve [0 .. 4]
 
