@@ -14,8 +14,7 @@ runThrusters program = foldl runThrusterPhase 0
           (Terminated, program') = resume' prevOut
        in lastOutput program'
 
-maxThruster program =
-  maximum $ fmap (runThrusters program) (permutations [0 .. 4])
+maxThruster program = maximum $ runThrusters program <$> permutations [0 .. 4]
 
 solveA = toInteger . maxThruster . parseProgram
 
@@ -40,5 +39,4 @@ startThrusters program settings =
 
 solveB input =
   let program = parseProgram input
-   in toInteger . maximum $
-      fmap (startThrusters program) (permutations [5 .. 9])
+   in toInteger . maximum $ startThrusters program <$> permutations [5 .. 9]
