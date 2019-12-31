@@ -13,7 +13,7 @@ module IntCode
 
 import           Control.Lens
 import           Control.Monad.State
-import           Data.IntMap.Lazy    (IntMap, empty, fromDistinctAscList,
+import           Data.IntMap         (IntMap, empty, fromDistinctAscList,
                                       insert, lookup)
 import           Data.List.Split     (splitOn)
 import           Data.Maybe
