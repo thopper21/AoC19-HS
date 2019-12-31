@@ -125,10 +125,10 @@ writeArg Position offset value = do
 
 moveIP offset = modify $ over ip (+ offset)
 
-binaryOp op leftParam rightParam outParam = do
+binaryOp leftParam op rightParam outParam = do
   left <- readArg leftParam 1
   right <- readArg rightParam 2
-  let result = op left right
+  let result = left `op` right
   writeArg outParam 3 result
   moveIP 4
   continue
@@ -151,7 +151,7 @@ toOutput inParam = do
 
 setIP = modify . set ip
 
-jump jumpIf valParam posParam = do
+jump valParam jumpIf posParam = do
   val <- readArg valParam 1
   if jumpIf val
     then do
@@ -160,7 +160,7 @@ jump jumpIf valParam posParam = do
     else moveIP 3
   continue
 
-cmp fn leftParam rightParam outParam = do
+cmp leftParam fn rightParam outParam = do
   left <- readArg leftParam 1
   right <- readArg rightParam 2
   let out =
@@ -173,14 +173,14 @@ cmp fn leftParam rightParam outParam = do
 
 terminate = return Terminated
 
-execute (Ternary Add left right out)      = binaryOp (+) left right out
-execute (Ternary Mult left right out)     = binaryOp (*) left right out
+execute (Ternary Add left right out)      = binaryOp left (+) right out
+execute (Ternary Mult left right out)     = binaryOp left (*) right out
 execute (Unary In out)                    = fromInput out
 execute (Unary Out val)                   = toOutput val
-execute (Binary JumpIfTrue compare out)   = jump (/= 0) compare out
-execute (Binary JumpIfFalse compare out)  = jump (== 0) compare out
-execute (Ternary LessThan left right out) = cmp (<) left right out
-execute (Ternary Equals left right out)   = cmp (==) left right out
+execute (Binary JumpIfTrue compare out)   = jump compare (/= 0) out
+execute (Binary JumpIfFalse compare out)  = jump compare (== 0) out
+execute (Ternary LessThan left right out) = cmp left (<) right out
+execute (Ternary Equals left right out)   = cmp left (==) right out
 execute (Nullary Terminate)               = terminate
 
 continue = do
