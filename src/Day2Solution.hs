@@ -7,7 +7,7 @@ import           IntCode
 
 toProgram noun verb = writeMem 2 verb . writeMem 1 noun . parseProgram
 
-result = toInteger . readMem 0 . run
+result = toInteger . readMem 0 . snd . run
 
 solveA = result . toProgram 12 2
 

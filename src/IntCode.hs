@@ -57,6 +57,9 @@ data Operation
             ParamMode
             ParamMode
 
+data ProgramState =
+  Terminated
+
 makeLenses ''Program
 
 emptyProgram = Program {_memory = empty, _ip = 0, _input = [], _output = []}
@@ -69,7 +72,7 @@ writeMem pos = over memory . insert pos
 
 readMem pos = fromJust . lookup pos . view memory
 
-lastOutput = head . view output
+lastOutput = head . view output . snd
 
 setInput = set input
 
@@ -143,6 +146,8 @@ cmp fn leftParam rightParam outParam = do
           else 0
   runNext 4 . writeArg outParam 3 out
 
+terminate program = (Terminated, program)
+
 execute (Ternary Add left right out)      = binaryOp (+) left right out
 execute (Ternary Mult left right out)     = binaryOp (*) left right out
 execute (Unary In out)                    = fromInput out
@@ -151,7 +156,7 @@ execute (Binary JumpIfTrue compare out)   = jump (/= 0) compare out
 execute (Binary JumpIfFalse compare out)  = jump (== 0) compare out
 execute (Ternary LessThan left right out) = cmp (<) left right out
 execute (Ternary Equals left right out)   = cmp (==) left right out
-execute (Nullary Terminate)               = id
+execute (Nullary Terminate)               = terminate
 
 exec = execute . operation
 
