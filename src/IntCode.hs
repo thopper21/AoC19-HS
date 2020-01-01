@@ -196,9 +196,11 @@ cmp leftParam fn rightParam outParam = do
 
 addRelative param = do
   val <- readArg param 1
-  modify $ over relativeBase (+ fromIntegral val)
+  add val
   moveIP 2
   continue
+  where
+    add val = modify $ over relativeBase (+ val)
 
 terminate = return Terminated
 
