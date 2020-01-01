@@ -130,7 +130,7 @@ readArg Position offset = do
   pos <- arg offset
   readMem . fromInteger $ pos
 readArg Relative offset = do
-  pos <- getRelativeOffset 1
+  pos <- getRelativeOffset offset
   readMem pos
 
 writeArg Immediate _ _ = error "Cannot write to immediate position"
@@ -138,7 +138,7 @@ writeArg Position offset value = do
   pos <- arg offset
   writeMem (fromInteger pos) value
 writeArg Relative offset value = do
-  pos <- getRelativeOffset 1
+  pos <- getRelativeOffset offset
   writeMem pos value
 
 moveIP offset = modify $ over ip (+ offset)

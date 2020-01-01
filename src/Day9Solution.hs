@@ -2,4 +2,11 @@ module Day9Solution
   ( solveA
   ) where
 
-solveA _ = 42
+import           IntCode
+
+runProgram input program =
+  let (AwaitingInput resume, _) = run program
+      (Terminated, program') = resume input
+   in lastOutput program'
+
+solveA = runProgram 1 . parseProgram
