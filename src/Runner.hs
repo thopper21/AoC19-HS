@@ -52,6 +52,7 @@ solution Day7 Part2 = print . D7.solveB
 solution Day8 Part1 = print . D8.solveA
 solution Day8 Part2 = putStr . D8.solveB
 solution Day9 Part1 = print . D9.solveA
+solution Day9 Part2 = print . D9.solveB
 
 input day = "input/Day" ++ show (toDayNumber day) ++ ".txt"
 
