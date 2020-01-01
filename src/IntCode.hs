@@ -85,19 +85,22 @@ readMem pos = gets $ readMemory pos
 
 lastOutput = head . view output
 
-paramMode 0 = Position
-paramMode 1 = Immediate
-paramMode 2 = Relative
+param = do
+  result <- gets $ paramMode . (`mod` 10)
+  modify (`div` 10)
+  return result
+  where
+    paramMode 0 = Position
+    paramMode 1 = Immediate
+    paramMode 2 = Relative
 
-param (f, x) = (f $ paramMode (x `mod` 10), x `div` 10)
+ternary op = Ternary op <$> param <*> param <*> param
 
-ternary op params = fst . param . param . param $ (Ternary op, params)
+binary op = Binary op <$> param <*> param
 
-binary op params = fst . param . param $ (Binary op, params)
+unary op = Unary op <$> param
 
-unary op params = fst . param $ (Unary op, params)
-
-nullary op 0 = Nullary op
+nullary op = return $ Nullary op
 
 operator 1  = ternary Add
 operator 2  = ternary Mult
@@ -110,7 +113,10 @@ operator 8  = ternary Equals
 operator 9  = unary AddRelative
 operator 99 = nullary Terminate
 
-operation opCode = operator (opCode `mod` 100) (opCode `div` 100)
+operation opCode = evalState op paramMode
+  where
+    op = operator $ opCode `mod` 100
+    paramMode = opCode `div` 100
 
 getIP = gets $ view ip
 
@@ -186,7 +192,7 @@ cmp leftParam fn rightParam outParam = do
   moveIP 4
   continue
   where
-    outValue True = 1
+    outValue True  = 1
     outValue False = 0
 
 addRelative param = do
