@@ -13,17 +13,17 @@ module IntCode
 
 import           Control.Lens
 import           Control.Monad.State
-import           Data.IntMap         (IntMap, empty, fromDistinctAscList,
-                                      insert, lookup)
 import           Data.List.Split     (splitOn)
+import           Data.Map            (Map, empty, fromDistinctAscList, insert,
+                                      lookup)
 import           Data.Maybe
 import           Prelude             hiding (lookup)
 
 data Program = Program
-  { _memory       :: IntMap Integer
-  , _ip           :: Int
+  { _memory       :: Map Integer Integer
+  , _ip           :: Integer
   , _output       :: [Integer]
-  , _relativeBase :: Int
+  , _relativeBase :: Integer
   }
 
 data NullaryOp =
@@ -129,12 +129,12 @@ arg offset = do
 getRelativeOffset offset = do
   relativeOffset <- arg offset
   relativeBase <- getRelativeBase
-  return $ relativeBase + fromInteger relativeOffset
+  return $ relativeBase + relativeOffset
 
 readArg Immediate offset = arg offset
 readArg Position offset = do
   pos <- arg offset
-  readMem . fromInteger $ pos
+  readMem pos
 readArg Relative offset = do
   pos <- getRelativeOffset offset
   readMem pos
@@ -142,7 +142,7 @@ readArg Relative offset = do
 writeArg Immediate _ _ = error "Cannot write to immediate position"
 writeArg Position offset value = do
   pos <- arg offset
-  writeMem (fromInteger pos) value
+  writeMem pos value
 writeArg Relative offset value = do
   pos <- getRelativeOffset offset
   writeMem pos value
@@ -178,7 +178,7 @@ jump valParam jumpIf posParam = do
   if jumpIf val
     then do
       pos <- readArg posParam 2
-      setIP $ fromInteger pos
+      setIP pos
     else moveIP 3
   continue
   where
