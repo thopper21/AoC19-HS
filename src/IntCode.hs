@@ -5,6 +5,7 @@ module IntCode
   ( parseProgram
   , program
   , run
+  , runWithInput
   , writeMemory
   , readMemory
   , lastOutput
@@ -214,3 +215,10 @@ continue = do
   execute . operation $ opCode
 
 run = runState continue
+
+runWithInput input = runWithInput' input . run
+  where
+    runWithInput' [] result = result
+    runWithInput' (input:inputs) (AwaitingInput resume, _) =
+      runWithInput' inputs $ resume input
+    runWithInput' _ result@(Terminated, _) = result

@@ -12,9 +12,7 @@ runFeedbackThrusters input (AwaitingInput resume) stateB stateC stateD stateE =
       input' = lastOutput program
    in runFeedbackThrusters input' stateB stateC stateD stateE stateA
 
-startThruster program setting =
-  let (AwaitingInput resume, _) = run program
-   in resume setting
+startThruster program setting = runWithInput [setting] program
 
 runThrusters program settings =
   let [a, b, c, d, e] = fst . startThruster program <$> settings

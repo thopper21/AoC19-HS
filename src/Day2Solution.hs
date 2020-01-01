@@ -7,9 +7,7 @@ import           IntCode
 
 toProgram noun verb = writeMemory 2 verb . writeMemory 1 noun . parseProgram
 
-result program =
-  let (Terminated, program') = run program
-   in readMemory 0 program'
+result = readMemory 0 . snd . run
 
 solveA = result . toProgram 12 2
 

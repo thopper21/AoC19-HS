@@ -5,10 +5,7 @@ module Day5Solution
 
 import           IntCode
 
-runProgram input program =
-  let (AwaitingInput resume, _) = run program
-      (Terminated, program') = resume input
-   in lastOutput program'
+runProgram input = lastOutput . snd . runWithInput [input]
 
 solve input = runProgram input . parseProgram
 
