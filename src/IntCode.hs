@@ -181,13 +181,13 @@ jump valParam jumpIf posParam = do
 cmp leftParam fn rightParam outParam = do
   left <- readArg leftParam 1
   right <- readArg rightParam 2
-  let out =
-        if fn left right
-          then 1
-          else 0
+  let out = outValue $ fn left right
   writeArg outParam 3 out
   moveIP 4
   continue
+  where
+    outValue True = 1
+    outValue False = 0
 
 addRelative param = do
   val <- readArg param 1
