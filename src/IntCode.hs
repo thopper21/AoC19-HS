@@ -68,9 +68,9 @@ data ProgramState
 
 makeLenses ''Program
 
-emptyProgram = Program empty 0 [] 0
-
-program input = set memory (fromList $ zip [0 ..] input) emptyProgram
+program input = Program memory 0 [] 0
+  where
+    memory = fromList $ zip [0 ..] input
 
 parseProgram = program . fmap read . splitOn ","
 
