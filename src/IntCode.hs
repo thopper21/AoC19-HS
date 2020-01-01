@@ -200,7 +200,7 @@ addRelative param = do
   moveIP 2
   continue
   where
-    add val = modify $ over relativeBase (+ val)
+    add = modify . over relativeBase . (+)
 
 terminate = return Terminated
 
