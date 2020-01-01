@@ -13,9 +13,8 @@ module IntCode
 
 import           Control.Lens
 import           Control.Monad.State
+import           Data.HashMap        (Map, empty, fromList, insert, lookup)
 import           Data.List.Split     (splitOn)
-import           Data.Map            (Map, empty, fromDistinctAscList, insert,
-                                      lookup)
 import           Data.Maybe
 import           Prelude             hiding (lookup)
 
@@ -71,7 +70,7 @@ makeLenses ''Program
 
 emptyProgram = Program empty 0 [] 0
 
-program input = set memory (fromDistinctAscList $ zip [0 ..] input) emptyProgram
+program input = set memory (fromList $ zip [0 ..] input) emptyProgram
 
 parseProgram = program . fmap read . splitOn ","
 
