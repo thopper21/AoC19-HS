@@ -3,7 +3,6 @@
 
 module IntCode
   ( parseProgram
-  , program
   , run
   , runWithInput
   , writeMemory
