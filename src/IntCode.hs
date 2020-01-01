@@ -119,8 +119,6 @@ operation opCode = evalState op paramMode
 
 getIP = gets $ view ip
 
-getRelativeBase = gets $ view relativeBase
-
 arg offset = do
   pos <- getIP
   readMem (pos + offset)
@@ -129,6 +127,8 @@ getRelativeOffset offset = do
   relativeOffset <- arg offset
   relativeBase <- getRelativeBase
   return $ relativeBase + relativeOffset
+  where
+    getRelativeBase = gets $ view relativeBase
 
 readArg Immediate offset = arg offset
 readArg Position offset = do
