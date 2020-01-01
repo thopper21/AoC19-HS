@@ -31,7 +31,7 @@ data NullaryOp =
 data UnaryOp
   = In
   | Out
-  | AddRelative
+  | AdjustRelativeBase
 
 data BinaryOp
   = JumpIfTrue
@@ -109,7 +109,7 @@ operator 5  = binary JumpIfTrue
 operator 6  = binary JumpIfFalse
 operator 7  = ternary LessThan
 operator 8  = ternary Equals
-operator 9  = unary AddRelative
+operator 9  = unary AdjustRelativeBase
 operator 99 = nullary Terminate
 
 operation opCode = evalState op paramMode
@@ -194,13 +194,13 @@ cmp leftParam fn rightParam outParam = do
     outValue True  = 1
     outValue False = 0
 
-addRelative param = do
+adjustRelativeBase param = do
   val <- readArg param 1
-  add val
+  addRelative val
   moveIP 2
   continue
   where
-    add = modify . over relativeBase . (+)
+    addRelative = modify . over relativeBase . (+)
 
 terminate = return Terminated
 
@@ -212,7 +212,7 @@ execute (Binary JumpIfTrue compare out)   = jump compare (/= 0) out
 execute (Binary JumpIfFalse compare out)  = jump compare (== 0) out
 execute (Ternary LessThan left right out) = cmp left (<) right out
 execute (Ternary Equals left right out)   = cmp left (==) right out
-execute (Unary AddRelative val)           = addRelative val
+execute (Unary AdjustRelativeBase val)    = adjustRelativeBase val
 execute (Nullary Terminate)               = terminate
 
 continue = do
