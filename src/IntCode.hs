@@ -86,9 +86,9 @@ readMem pos = gets $ readMemory pos
 lastOutput = head . view output
 
 param = do
-  result <- gets $ paramMode . (`mod` 10)
+  result <- gets (`mod` 10)
   modify (`div` 10)
-  return result
+  return $ paramMode result
   where
     paramMode 0 = Position
     paramMode 1 = Immediate
