@@ -20,9 +20,10 @@ import           Data.Maybe
 import           Prelude             hiding (lookup)
 
 data Program = Program
-  { _memory :: IntMap Integer
-  , _ip     :: Int
-  , _output :: [Integer]
+  { _memory       :: IntMap Integer
+  , _ip           :: Int
+  , _output       :: [Integer]
+  , _relativeBase :: Int
   }
 
 data NullaryOp =
@@ -31,6 +32,7 @@ data NullaryOp =
 data UnaryOp
   = In
   | Out
+  | AddRelative
 
 data BinaryOp
   = JumpIfTrue
@@ -45,6 +47,7 @@ data TernaryOp
 data ParamMode
   = Immediate
   | Position
+  | Relative
 
 data Operation
   = Nullary NullaryOp
@@ -66,13 +69,15 @@ data ProgramState
 
 makeLenses ''Program
 
-emptyProgram = Program {_memory = empty, _ip = 0, _output = []}
+emptyProgram = Program empty 0 [] 0
 
 program input = set memory (fromDistinctAscList $ zip [0 ..] input) emptyProgram
 
 parseProgram = program . fmap read . splitOn ","
 
 writeMemory pos = over memory . insert pos
+
+writeMem pos = modify . writeMemory pos
 
 readMemory pos = fromMaybe 0 . lookup pos . view memory
 
@@ -82,6 +87,7 @@ lastOutput = head . view output
 
 paramMode 0 = Position
 paramMode 1 = Immediate
+paramMode 2 = Relative
 
 param (f, x) = (f $ paramMode (x `mod` 10), x `div` 10)
 
@@ -101,27 +107,39 @@ operator 5  = binary JumpIfTrue
 operator 6  = binary JumpIfFalse
 operator 7  = ternary LessThan
 operator 8  = ternary Equals
+operator 9  = unary AddRelative
 operator 99 = nullary Terminate
 
 operation opCode = operator (opCode `mod` 100) (opCode `div` 100)
 
 getIP = gets $ view ip
 
+getRelativeBase = gets $ view relativeBase
+
 arg offset = do
   pos <- getIP
   readMem (pos + offset)
+
+getRelativeOffset offset = do
+  relativeOffset <- arg offset
+  relativeBase <- getRelativeBase
+  return $ relativeBase + fromInteger relativeOffset
 
 readArg Immediate offset = arg offset
 readArg Position offset = do
   pos <- arg offset
   readMem . fromInteger $ pos
+readArg Relative offset = do
+  pos <- getRelativeOffset 1
+  readMem pos
 
 writeArg Immediate _ _ = error "Cannot write to immediate position"
 writeArg Position offset value = do
   pos <- arg offset
+  writeMem (fromInteger pos) value
+writeArg Relative offset value = do
+  pos <- getRelativeOffset 1
   writeMem pos value
-  where
-    writeMem pos = modify . writeMemory (fromInteger pos)
 
 moveIP offset = modify $ over ip (+ offset)
 
@@ -171,6 +189,12 @@ cmp leftParam fn rightParam outParam = do
   moveIP 4
   continue
 
+addRelative param = do
+  val <- readArg param 1
+  modify $ over relativeBase (+ fromIntegral val)
+  moveIP 2
+  continue
+
 terminate = return Terminated
 
 execute (Ternary Add left right out)      = binaryOp left (+) right out
@@ -181,6 +205,7 @@ execute (Binary JumpIfTrue compare out)   = jump compare (/= 0) out
 execute (Binary JumpIfFalse compare out)  = jump compare (== 0) out
 execute (Ternary LessThan left right out) = cmp left (<) right out
 execute (Ternary Equals left right out)   = cmp left (==) right out
+execute (Unary AddRelative val)           = addRelative val
 execute (Nullary Terminate)               = terminate
 
 continue = do
