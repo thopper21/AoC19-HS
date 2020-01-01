@@ -8,6 +8,7 @@ import qualified Day5Solution as D5
 import qualified Day6Solution as D6
 import qualified Day7Solution as D7
 import qualified Day8Solution as D8
+import qualified Day9Solution as D9
 
 data Day
   = Day1
@@ -18,6 +19,7 @@ data Day
   | Day6
   | Day7
   | Day8
+  | Day9
 
 data Part
   = Part1
@@ -31,6 +33,7 @@ toDayNumber Day5 = 5
 toDayNumber Day6 = 6
 toDayNumber Day7 = 7
 toDayNumber Day8 = 8
+toDayNumber Day9 = 9
 
 solution Day1 Part1 = print . D1.solveA
 solution Day1 Part2 = print . D1.solveB
@@ -48,6 +51,7 @@ solution Day7 Part1 = print . D7.solveA
 solution Day7 Part2 = print . D7.solveB
 solution Day8 Part1 = print . D8.solveA
 solution Day8 Part2 = putStr . D8.solveB
+solution Day9 Part1 = print . D9.solveA
 
 input day = "input/Day" ++ show (toDayNumber day) ++ ".txt"
 
