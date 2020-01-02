@@ -119,86 +119,88 @@ operation opCode = evalState op paramMode
 
 getIP = gets $ view ip
 
-arg offset = do
-  pos <- getIP
-  readMem (pos + offset)
+incIP = modify $ over ip (+ 1)
 
-getRelativeOffset offset = do
-  relativeOffset <- arg offset
+nextOp = do
+  incIP
+  continue
+
+readIP = do
+  pos <- getIP
+  readMem pos
+
+nextArg = do
+  incIP
+  readIP
+
+nextRelativeOffset = do
+  relativeOffset <- nextArg
   relativeBase <- getRelativeBase
   return $ relativeBase + relativeOffset
   where
     getRelativeBase = gets $ view relativeBase
 
-readArg Immediate offset = arg offset
-readArg Position offset = do
-  pos <- arg offset
+readNext Immediate = nextArg
+readNext Position = do
+  pos <- nextArg
   readMem pos
-readArg Relative offset = do
-  pos <- getRelativeOffset offset
+readNext Relative = do
+  pos <- nextRelativeOffset
   readMem pos
 
-writeArg Immediate _ _ = error "Cannot write to immediate position"
-writeArg Position offset value = do
-  pos <- arg offset
+writeNext Position value = do
+  pos <- nextArg
   writeMem pos value
-writeArg Relative offset value = do
-  pos <- getRelativeOffset offset
+writeNext Relative value = do
+  pos <- nextRelativeOffset
   writeMem pos value
-
-moveIP offset = modify $ over ip (+ offset)
 
 binaryOp leftParam op rightParam outParam = do
-  left <- readArg leftParam 1
-  right <- readArg rightParam 2
+  left <- readNext leftParam
+  right <- readNext rightParam
   let result = left `op` right
-  writeArg outParam 3 result
-  moveIP 4
-  continue
+  writeNext outParam result
+  nextOp
 
 fromInput outParam = gets $ AwaitingInput . continuation
   where
     resume val = do
-      writeArg outParam 1 val
-      moveIP 2
-      continue
+      writeNext outParam val
+      nextOp
     continuation = flip $ runState . resume
 
 toOutput inParam = do
-  val <- readArg inParam 1
+  val <- readNext inParam
   outputValue val
-  moveIP 2
-  continue
+  nextOp
   where
     outputValue = modify . over output . cons
 
 jump valParam jumpIf posParam = do
-  val <- readArg valParam 1
+  val <- readNext valParam
+  pos <- readNext posParam
   if jumpIf val
     then do
-      pos <- readArg posParam 2
       setIP pos
-    else moveIP 3
-  continue
+      continue
+    else nextOp
   where
     setIP = modify . set ip
 
 cmp leftParam fn rightParam outParam = do
-  left <- readArg leftParam 1
-  right <- readArg rightParam 2
+  left <- readNext leftParam
+  right <- readNext rightParam
   let out = outValue $ fn left right
-  writeArg outParam 3 out
-  moveIP 4
-  continue
+  writeNext outParam out
+  nextOp
   where
     outValue True  = 1
     outValue False = 0
 
 adjustRelativeBase param = do
-  val <- readArg param 1
+  val <- readNext param
   adjustBy val
-  moveIP 2
-  continue
+  nextOp
   where
     adjustBy = modify . over relativeBase . (+)
 
