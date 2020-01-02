@@ -25,40 +25,10 @@ data Program = Program
   , _relativeBase :: Integer
   }
 
-data NullaryOp =
-  Terminate
-
-data UnaryOp
-  = In
-  | Out
-  | AdjustRelativeBase
-
-data BinaryOp
-  = JumpIfTrue
-  | JumpIfFalse
-
-data TernaryOp
-  = Add
-  | Mult
-  | LessThan
-  | Equals
-
 data ParamMode
   = Immediate
   | Position
   | Relative
-
-data Operation
-  = Nullary NullaryOp
-  | Unary UnaryOp
-          ParamMode
-  | Binary BinaryOp
-           ParamMode
-           ParamMode
-  | Ternary TernaryOp
-            ParamMode
-            ParamMode
-            ParamMode
 
 type ResumeProgram = Integer -> (ProgramState, Program)
 
@@ -83,39 +53,6 @@ readMemory pos = fromMaybe 0 . lookup pos . view memory
 readMem pos = gets $ readMemory pos
 
 lastOutput = head . view output
-
-param = do
-  result <- gets (`mod` 10)
-  modify (`div` 10)
-  return $ paramMode result
-  where
-    paramMode 0 = Position
-    paramMode 1 = Immediate
-    paramMode 2 = Relative
-
-ternary op = Ternary op <$> param <*> param <*> param
-
-binary op = Binary op <$> param <*> param
-
-unary op = Unary op <$> param
-
-nullary op = return $ Nullary op
-
-operator 1  = ternary Add
-operator 2  = ternary Mult
-operator 3  = unary In
-operator 4  = unary Out
-operator 5  = binary JumpIfTrue
-operator 6  = binary JumpIfFalse
-operator 7  = ternary LessThan
-operator 8  = ternary Equals
-operator 9  = unary AdjustRelativeBase
-operator 99 = nullary Terminate
-
-operation opCode = evalState op paramMode
-  where
-    op = operator $ opCode `mod` 100
-    paramMode = opCode `div` 100
 
 getIP = gets $ view ip
 
@@ -155,12 +92,16 @@ writeNext Relative value = do
   pos <- nextRelativeOffset
   writeMem pos value
 
-binaryOp leftParam op rightParam outParam = do
+binaryOp op leftParam rightParam outParam = do
   left <- readNext leftParam
   right <- readNext rightParam
   let result = left `op` right
   writeNext outParam result
   nextOp
+  
+add = binaryOp (+)
+
+mult = binaryOp (*)
 
 fromInput outParam = gets $ AwaitingInput . continuation
   where
@@ -176,7 +117,7 @@ toOutput inParam = do
   where
     outputValue = modify . over output . cons
 
-jump valParam jumpIf posParam = do
+jump jumpIf valParam posParam = do
   val <- readNext valParam
   pos <- readNext posParam
   if jumpIf val
@@ -187,7 +128,11 @@ jump valParam jumpIf posParam = do
   where
     setIP = modify . set ip
 
-cmp leftParam fn rightParam outParam = do
+jumpIfTrue = jump (/= 0)
+
+jumpIfFalse = jump (== 0)
+
+cmp fn leftParam rightParam outParam = do
   left <- readNext leftParam
   right <- readNext rightParam
   let out = outValue $ fn left right
@@ -196,6 +141,10 @@ cmp leftParam fn rightParam outParam = do
   where
     outValue True  = 1
     outValue False = 0
+
+lessThan = cmp (<)
+
+equals = cmp (==)
 
 adjustRelativeBase param = do
   val <- readNext param
@@ -206,21 +155,43 @@ adjustRelativeBase param = do
 
 terminate = return Terminated
 
-execute (Ternary Add left right out)      = binaryOp left (+) right out
-execute (Ternary Mult left right out)     = binaryOp left (*) right out
-execute (Unary In out)                    = fromInput out
-execute (Unary Out val)                   = toOutput val
-execute (Binary JumpIfTrue compare out)   = jump compare (/= 0) out
-execute (Binary JumpIfFalse compare out)  = jump compare (== 0) out
-execute (Ternary LessThan left right out) = cmp left (<) right out
-execute (Ternary Equals left right out)   = cmp left (==) right out
-execute (Unary AdjustRelativeBase val)    = adjustRelativeBase val
-execute (Nullary Terminate)               = terminate
+param = do
+  result <- gets (`mod` 10)
+  modify (`div` 10)
+  return $ paramMode result
+  where
+    paramMode 0 = Position
+    paramMode 1 = Immediate
+    paramMode 2 = Relative
+
+ternary op = op <$> param <*> param <*> param
+
+binary op = op <$> param <*> param
+
+unary op = op <$> param
+
+nullary = return
+
+operator 1  = ternary add
+operator 2  = ternary mult
+operator 3  = unary fromInput
+operator 4  = unary toOutput
+operator 5  = binary jumpIfTrue
+operator 6  = binary jumpIfFalse
+operator 7  = ternary lessThan
+operator 8  = ternary equals
+operator 9  = unary adjustRelativeBase
+operator 99 = nullary terminate
+
+execute opCode = evalState op paramMode
+  where
+    op = operator $ opCode `mod` 100
+    paramMode = opCode `div` 100
 
 continue = do
   pos <- getIP
   opCode <- readMem pos
-  execute . operation $ opCode
+  execute opCode
 
 run = runState continue
 
