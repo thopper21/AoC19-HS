@@ -54,8 +54,6 @@ readMem pos = gets $ readMemory pos
 
 lastOutput = head . view output
 
-getIP = gets $ view ip
-
 incIP = modify $ over ip (+ 1)
 
 nextOp = do
@@ -65,6 +63,8 @@ nextOp = do
 readIP = do
   pos <- getIP
   readMem pos
+  where
+    getIP = gets $ view ip
 
 nextArg = do
   incIP
@@ -189,8 +189,7 @@ execute opCode = evalState op paramMode
     paramMode = opCode `div` 100
 
 continue = do
-  pos <- getIP
-  opCode <- readMem pos
+  opCode <- readIP
   execute opCode
 
 run = runState continue
