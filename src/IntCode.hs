@@ -21,7 +21,7 @@ import           Prelude             hiding (lookup)
 data Program = Program
   { _memory       :: Map Integer Integer
   , _ip           :: Integer
-  , _output       :: [Integer]
+  , _outputValues :: [Integer]
   , _relativeBase :: Integer
   }
 
@@ -52,7 +52,7 @@ readMemory pos = fromMaybe 0 . lookup pos . view memory
 
 readMem pos = gets $ readMemory pos
 
-lastOutput = head . view output
+lastOutput = head . view outputValues
 
 incIP = modify $ over ip (+ 1)
 
@@ -98,24 +98,24 @@ binaryOp op leftParam rightParam outParam = do
   let result = left `op` right
   writeNext outParam result
   nextOp
-  
+
 add = binaryOp (+)
 
 mult = binaryOp (*)
 
-fromInput outParam = gets $ AwaitingInput . continuation
+input outParam = gets $ AwaitingInput . continuation
   where
     resume val = do
       writeNext outParam val
       nextOp
     continuation = flip $ runState . resume
 
-toOutput inParam = do
+output inParam = do
   val <- readNext inParam
   outputValue val
   nextOp
   where
-    outputValue = modify . over output . cons
+    outputValue = modify . over outputValues . cons
 
 jump jumpIf valParam posParam = do
   val <- readNext valParam
@@ -174,8 +174,8 @@ nullary = return
 
 operator 1  = ternary add
 operator 2  = ternary mult
-operator 3  = unary fromInput
-operator 4  = unary toOutput
+operator 3  = unary input
+operator 4  = unary output
 operator 5  = binary jumpIfTrue
 operator 6  = binary jumpIfFalse
 operator 7  = ternary lessThan
