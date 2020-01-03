@@ -1,14 +1,15 @@
 module Runner where
 
-import qualified Day1Solution as D1
-import qualified Day2Solution as D2
-import qualified Day3Solution as D3
-import qualified Day4Solution as D4
-import qualified Day5Solution as D5
-import qualified Day6Solution as D6
-import qualified Day7Solution as D7
-import qualified Day8Solution as D8
-import qualified Day9Solution as D9
+import qualified Day10Solution as D10
+import qualified Day1Solution  as D1
+import qualified Day2Solution  as D2
+import qualified Day3Solution  as D3
+import qualified Day4Solution  as D4
+import qualified Day5Solution  as D5
+import qualified Day6Solution  as D6
+import qualified Day7Solution  as D7
+import qualified Day8Solution  as D8
+import qualified Day9Solution  as D9
 
 data Day
   = Day1
@@ -20,39 +21,43 @@ data Day
   | Day7
   | Day8
   | Day9
+  | Day10
 
 data Part
   = Part1
   | Part2
 
-toDayNumber Day1 = 1
-toDayNumber Day2 = 2
-toDayNumber Day3 = 3
-toDayNumber Day4 = 4
-toDayNumber Day5 = 5
-toDayNumber Day6 = 6
-toDayNumber Day7 = 7
-toDayNumber Day8 = 8
-toDayNumber Day9 = 9
+toDayNumber Day1  = 1
+toDayNumber Day2  = 2
+toDayNumber Day3  = 3
+toDayNumber Day4  = 4
+toDayNumber Day5  = 5
+toDayNumber Day6  = 6
+toDayNumber Day7  = 7
+toDayNumber Day8  = 8
+toDayNumber Day9  = 9
+toDayNumber Day10 = 10
 
-solution Day1 Part1 = print . D1.solveA
-solution Day1 Part2 = print . D1.solveB
-solution Day2 Part1 = print . D2.solveA
-solution Day2 Part2 = print . D2.solveB
-solution Day3 Part1 = print . D3.solveA
-solution Day3 Part2 = print . D3.solveB
-solution Day4 Part1 = print . D4.solveA
-solution Day4 Part2 = print . D4.solveB
-solution Day5 Part1 = print . D5.solveA
-solution Day5 Part2 = print . D5.solveB
-solution Day6 Part1 = print . D6.solveA
-solution Day6 Part2 = print . D6.solveB
-solution Day7 Part1 = print . D7.solveA
-solution Day7 Part2 = print . D7.solveB
-solution Day8 Part1 = print . D8.solveA
-solution Day8 Part2 = putStr . D8.solveB
-solution Day9 Part1 = print . D9.solveA
-solution Day9 Part2 = print . D9.solveB
+solution Day1 Part1  = print . D1.solveA
+solution Day1 Part2  = print . D1.solveB
+solution Day2 Part1  = print . D2.solveA
+solution Day2 Part2  = print . D2.solveB
+solution Day3 Part1  = print . D3.solveA
+solution Day3 Part2  = print . D3.solveB
+solution Day4 Part1  = print . D4.solveA
+solution Day4 Part2  = print . D4.solveB
+solution Day5 Part1  = print . D5.solveA
+solution Day5 Part2  = print . D5.solveB
+solution Day6 Part1  = print . D6.solveA
+solution Day6 Part2  = print . D6.solveB
+solution Day7 Part1  = print . D7.solveA
+solution Day7 Part2  = print . D7.solveB
+solution Day8 Part1  = print . D8.solveA
+solution Day8 Part2  = putStr . D8.solveB
+solution Day9 Part1  = print . D9.solveA
+solution Day9 Part2  = print . D9.solveB
+solution Day10 Part1 = print . D10.solveA
+solution Day10 Part2 = print . D10.solveB
 
 input day = "input/Day" ++ show (toDayNumber day) ++ ".txt"
 
